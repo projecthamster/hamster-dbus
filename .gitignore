@@ -1,0 +1,63 @@
+*.py[cod]
+*~
+.python-version
+__pycache__
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+.bundle
+dist
+build
+eggs
+parts
+sdist
+source.tar.gz
+develop-eggs
+.installed.cfg
+vendor
+
+# envdirs
+envs/*
+!envs/dev
+envs/dev/*KEY
+envs/dev/*TOKEN
+
+# Django
+kmncms/media/*
+!kmncms/media/.gitkeep
+kmncms/static_root/*
+!kmncms/static_root/.gitkeep
+heroku/static_root/*
+!heroku/static_root/.gitkeep
+
+# Logs
+*.log
+*.log.*
+pip-log.txt
+
+# Unit test / coverage reports
+.cache
+.coverage
+.tox
+htmlcov
+
+# Translations
+*.mo
+
+# Complexity
+output/*.html
+output/*/index.html
+
+# npm
+node_modules
+
+# webpack
+kmncms/webpack-stats-development.json
+kmncms/static/bundles-development
+
+# Sphinx
+docs/_build
