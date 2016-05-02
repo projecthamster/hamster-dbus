@@ -5,8 +5,11 @@ import dbus
 import os
 import errno
 import time
+from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import GLib, GObject, Gtk
 
-# Adaption of testup ised in TtestHamsterDBusServiceDbusMockStyle
+from hamster_dbus.hamster_dbus import HamsterDBusService
+
 
 @pytest.fixture
 def init_session_bus(request):
@@ -19,26 +22,9 @@ def init_session_bus(request):
         tuple: (pid, address) pair.
     """
     def fin():
-        try:
-            del os.environ['DBUS_SESSION_BUS_ADDRESS']
-        except KeyError:
-            pass
-        signal.signal(signal.SIGTERM, signal.SIG_IGN)
-        timeout = 5
-        while timeout > 0:
-            try:
-                os.kill(pid, signal.SIGTERM)
-            except OSError as e:
-                if e.errno == errno.ESRCH:
-                    break
-                else:
-                    raise
-            time.sleep(0.1)
-        else:
-            sys.stderr.write('ERROR: timed out waiting for bus process to terminate\n')
-            os.kill(pid, signal.SIGKILL)
-            time.sleep(0.5)
-        signal.signal(signal.SIGTERM, signal.SIG_DFL)
+        # [FIXME]
+        # We propably could be a bit more gentle then this.
+        os.kill(pid, signal.SIGKILL)
 
     argv = ['dbus-launch']
     out = subprocess.check_output(argv, universal_newlines=True)
@@ -76,6 +62,8 @@ def hamster_service(request, session_bus):
     import time
     import psutil
     def fin():
+        # [FIXME]
+        # We propably could be a bit more gentle then this.
         os.kill(deamon.pid, signal.SIGKILL)
     env = os.environ.copy()
     deamon = subprocess.Popen([sys.executable, '-m', 'hamster_dbus.hamster_dbus', 'server'], env=env)
@@ -86,72 +74,58 @@ def hamster_service(request, session_bus):
 
 
 @pytest.fixture
-def hamster_interface(request, session_bus, hamster_service):
+def hamster_service2(request, session_bus):
+    """This roughly works but lacks a nice way to tear down."""
+    import threading
+    def run_service():
+        DBusGMainLoop(set_as_default=True)
+        loop = GLib.MainLoop()
+        # Run needs to be called after we setup our service
+        loop.run()
+    def fin():
+        thread.exit()
+        raise TypeError
+    thread = threading.Thread(target=run_service)
+    thread.deamon = True
+    thread.start()
+    myservice = HamsterDBusService()
+    #request.addfinalizer(fin)
+    return thread
+
+
+@pytest.fixture
+def hamster_service3(request, session_bus):
+    """
+    This works as intended.
+
+    We delegate loop setup and service instanciation to a new subprocess.
+    Unline many examples we do not use ``process.join()`` as this would block our
+    process indefinitly.
+    Using pytest teardown mechanics will make sure we shut down the spawned process
+    afterwards. This is where ``multiprocessing`` surpasses our ``threading`` based
+    solution.
+    """
+    import multiprocessing
+    def run_service():
+        """Set up the mainloop and instanciate our dbus service class."""
+        DBusGMainLoop(set_as_default=True)
+        loop = GLib.MainLoop()
+        myservice = HamsterDBusService()
+        loop.run()
+    def fin():
+        """Shutdown the mainloop process."""
+        process.terminate()
+    process = multiprocessing.Process(target=run_service)
+    process.start()
+    # Make sure we give it time to launch. Otherwise clients may query to early.
+    time.sleep(2)
+    request.addfinalizer(fin)
+    return process
+
+
+
+@pytest.fixture
+def hamster_interface(request, session_bus, hamster_service3):
     """Provide a covinient interface hook to our hamster-dbus service."""
+    time.sleep(2)
     return session_bus.get_object('org.gnome.hamster_dbus', '/org/gnome/hamster_dbus')
-
-
-
-
-
-# END
-
-
-
-#@pytest.fixture
-#def subprocess_service():
-#    """Provide a running service fixture using the ``subpprocess`` approach."""
-#    env = os.environ.copy()
-#    subprocess.Popen(['python', 'hamster_dbus/hamster_dbus.py', 'server'], env=env)
-#    time.sleep(1)
-#    print(subprocess)
-#
-#
-#@pytest.fixture
-#def subprocess_remote_service(subprocess_service):
-#    bus = dbus.SessionBus()
-#    remote_object = bus.get_object('org.gnome.hamster_dbus', '/org/gnome/hamster_dbus')
-#    return remote_object
-#
-#
-#@pytest.yield_fixture()
-#def mock_loop():
-#    DBusGMainLoop(set_as_default=True)
-#    loop = GLib.MainLoop()
-#    yield loop.run()
-#    loop.quit()
-#
-#
-#@pytest.fixture
-#def mock_service2():
-#    nv = os.environ.copy()
-#    subprocess.Popen(['python', '../hamster_dbus/hamster_dbus.py', 'server'], env=env)
-#    # Wait for the service to become available
-#    time.sleep(1)
-#
-#@pytest.yield_fixture()
-#def mock_service(mock_loop):
-#    def launch_service(mock_loop):
-#        loop.run()
-#        myservice = hamster_dbus.HamsterDBusService()
-#    thread = Thread(target=launch_service)
-#    thread.start()
-#    print(thread)
-#    yield
-#    mock_loop.quit()
-#
-#
-#@pytest.fixture
-#def remote_object(mock_loop, mock_service):
-#    bus = dbus.SessionBus(mainloop=mock_loop)
-#    remote_object = bus.get_object('org.gnome.hamster_dbus', '/fo')
-#    return remote_object
-#
-#@pytest.yield_fixture
-#def service4():
-#    DBusGMainLoop(set_as_default=True)
-#    loop = GLib.MainLoop()
-#    loop.run()
-#    myservice = hamster_dbus.HamsterDBusService()
-#    yield loop
-#    loop.quit()

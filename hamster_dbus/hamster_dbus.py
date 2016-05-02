@@ -84,7 +84,6 @@ class HamsterDBusService(dbus.service.Object):
     @dbus.service.method(DBUS_SERVICE_NAME)
     def Quit(self):
         """Shutdown the service."""
-        #GLib.MainLoop().quit()
         self.loop.quit()
 
     # Category Methods
