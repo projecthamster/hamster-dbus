@@ -16,6 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with  'hamster-dbus'.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Most parts of our API do not provide decent input verification and error handling
+as most of this would break backwards compability. This is somethin we absolutly
+want once we are willing to break the API.
+"""
+
 from __future__ import unicode_literals
 
 from gi.repository import GLib
@@ -44,16 +50,16 @@ logger.addHandler(logging.StreamHandler())
 class HamsterDBusService(dbus.service.Object):
     """A session bus providing access to hamsterlib."""
 
-    def __init__(self, name=None, path=None, bus=None, loop=None):
+    def __init__(self, name=None, path=None, bus=None, loop=None, controler=None):
         self.loop = loop
         self.dbus_name = name or DBUS_SERVICE_NAME
         self.dbus_path = path or DBUS_OBJECT_PATH
         self.bus = dbus.SessionBus()
 
         bus_name = dbus.service.BusName(name=self.dbus_name, bus=self.bus)
-        super(HamsterDBusService, self).__init__(bus_name, self.dbus_path)
+        super(HamsterDBusService, self).__init__(bus_name, self.dbus_path)#, mainloop=loop)
 
-        self.controler = hamsterlib.HamsterControl(self._get_config())
+        self.controler = controler or hamsterlib.HamsterControl(self._get_config())
 
     @dbus.service.method('org.gnome.hamster_dbus')#.hello_world')
     def hello_world(self):
@@ -99,37 +105,65 @@ class HamsterDBusService(dbus.service.Object):
             int: PK of the created category or -1 if we failed.
         """
 
-        # It apears that dbus does *not* enforce passed arguments to be of given
-        # type. In particular, it is quite possible to pass it an integer which
-        # dbus does not even attempt to convert into a string.
-        logger.debug(name)
-        logger.debug(type(name))
-        if not isinstance(name, dbus.String):
-            message = _("Name is not a string!")
-            logger.error(message)
-            result = -1
-        else:
-            name = text_type(name)
-            try:
-                category = Category(name)
-            except:
-                logger.error(sys.exc_info())
-                result = -1
-                raise TypeError
-            else:
-                try:
-                    category = self.controler.store.categories.save(category)
-                except:
-                    logger.error(sys.exc_info())
-                    result = -1
-                    raise ValueError
-                else:
-                    result = category.pk
-                    # [FIXME]
-                    # Why 'activities'?
-                    self.activities_changed()
-        return result
+        category = Category(name)
+        print(type(self.controler.store.categories.save))
+        category = self.controler.store.categories.save(category)
+        return category.pk
 
+    @dbus.service.method(DBUS_SERVICE_NAME, in_signature='is')
+    def UpdateCategory(self, pk, name):
+        """
+        Update a category identified by its pk.
+
+        Args:
+            pk (int): PK of the category to be updated.
+            name (str): (New) name of the category.
+
+        Returns:
+            None
+        """
+
+        category = Category(name, pk=pk)
+        self.controler.store.categories.save(category)
+
+    @dbus.service.method(DBUS_SERVICE_NAME, in_signature='i')
+    def RemoveCategory(self, pk):
+        """
+        Remove a category.
+
+        Args:
+            pk (int): PK of the category to be removed.
+
+        Returns:
+            None
+        """
+
+        category = self.controler.store.categories.get(pk)
+        self.controler.store.categories.remove(category)
+
+    @dbus.service.method(DBUS_SERVICE_NAME, in_signature='s', out_signature='i')
+    def GetCategoryId(self, name):
+        """
+        Look up a category by its name and return its PK.
+
+        Args:
+            name (str): Name of the category to we want the PK of.
+
+        Returns:
+            int: PK of the category.
+        """
+        category = self.controler.categories.get_by_name(name)
+        return category.pk
+
+    @dbus.service.method(DBUS_SERVICE_NAME, out_signature='a(is)')
+    def GetCategories(self):
+        """
+        Get all categories.
+
+        Returns:
+            list: List of tuples with (category.pk, category.name)
+        """
+        return [(category.pk, category.name) for category in self.controler.categories.get_all()]
 
 
 

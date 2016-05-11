@@ -7,8 +7,40 @@ import errno
 import time
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib, GObject, Gtk
+from pytest_factoryboy import register
+import datetime
+import fauxfactory
 
 from hamster_dbus.hamster_dbus import HamsterDBusService
+import hamsterlib
+from . import factories
+
+register(factories.CategoryFactory)
+register(factories.ActivityFactory)
+register(factories.FactFactory)
+
+
+@pytest.fixture()
+def config(request, tmpdir):
+    return {
+        'store': 'sqlalchemy',
+        'day_start': datetime.time(5, 30, 0),
+        'fact_min_delta': 60,
+        'tmpfile_path': '/tmp/tmpfile.pickle',
+        'db_engine': 'sqlite',
+        'db_path': os.path.join(tmpdir.mkdir('hamster-dbus').strpath, 'test.sqlite')
+    }
+
+
+@pytest.fixture
+def controler(request, config):
+    return hamsterlib.HamsterControl(config)
+
+
+@pytest.fixture
+def store(request, controler):
+    """Just for the convenience of accessing our controlers store faster."""
+    return controler.store
 
 
 @pytest.fixture
@@ -51,50 +83,7 @@ def session_bus(init_session_bus):
 
 
 @pytest.fixture
-def hamster_service(request, session_bus):
-    """
-    Provide a hamster service running as a seperate process.
-
-    This is heavily inspired by the way ``dbusmock`` sets up its ``mock_server``
-    """
-    import subprocess
-    import sys
-    import time
-    import psutil
-    def fin():
-        # [FIXME]
-        # We propably could be a bit more gentle then this.
-        os.kill(deamon.pid, signal.SIGKILL)
-    env = os.environ.copy()
-    deamon = subprocess.Popen([sys.executable, '-m', 'hamster_dbus.hamster_dbus', 'server'], env=env)
-    # Wait for the service to become available
-    time.sleep(2)
-    request.addfinalizer(fin)
-    return deamon
-
-
-@pytest.fixture
-def hamster_service2(request, session_bus):
-    """This roughly works but lacks a nice way to tear down."""
-    import threading
-    def run_service():
-        DBusGMainLoop(set_as_default=True)
-        loop = GLib.MainLoop()
-        # Run needs to be called after we setup our service
-        loop.run()
-    def fin():
-        thread.exit()
-        raise TypeError
-    thread = threading.Thread(target=run_service)
-    thread.deamon = True
-    thread.start()
-    myservice = HamsterDBusService()
-    #request.addfinalizer(fin)
-    return thread
-
-
-@pytest.fixture
-def hamster_service3(request, session_bus):
+def hamster_service(request, controler, session_bus):
     """
     This works as intended.
 
@@ -106,26 +95,64 @@ def hamster_service3(request, session_bus):
     solution.
     """
     import multiprocessing
-    def run_service():
+    def run_service(controler):
         """Set up the mainloop and instanciate our dbus service class."""
         DBusGMainLoop(set_as_default=True)
         loop = GLib.MainLoop()
-        myservice = HamsterDBusService()
+        service = HamsterDBusService(controler=controler)
+        #q.put(service)
         loop.run()
     def fin():
         """Shutdown the mainloop process."""
         process.terminate()
-    process = multiprocessing.Process(target=run_service)
+    #q = multiprocessing.Queue()
+    process = multiprocessing.Process(target=run_service, args=(controler,))
     process.start()
+    process.join(1)
     # Make sure we give it time to launch. Otherwise clients may query to early.
-    time.sleep(2)
+    time.sleep(0.5)
     request.addfinalizer(fin)
+    #qu = q.get()
+    #print(qu)
     return process
 
 
 
 @pytest.fixture
-def hamster_interface(request, session_bus, hamster_service3):
-    """Provide a covinient interface hook to our hamster-dbus service."""
-    time.sleep(2)
+def hamster_interface(request, session_bus, hamster_service):
+    """Provide a covenient interface hook to our hamster-dbus service."""
     return session_bus.get_object('org.gnome.hamster_dbus', '/org/gnome/hamster_dbus')
+
+
+# Data
+
+@pytest.fixture(params=[
+    fauxfactory.gen_utf8(),
+    fauxfactory.gen_latin1(),
+    fauxfactory.gen_cjk(),
+])
+def category_name_parametrized(request):
+    return request.param
+
+
+# Stored instances
+@pytest.fixture
+def stored_category_factory(request, store, category_factory, faker):
+    def factory(**kwargs):
+        print(kwargs)
+        category = category_factory.build(**kwargs)
+        return store.categories.save(category)
+    return factory
+
+@pytest.fixture
+def stored_category(request, stored_category_factory):
+    return stored_category_factory()
+
+@pytest.fixture
+def stored_category_batch_factory(request, stored_category_factory, faker):
+    def factory(amount):
+        categories = []
+        for i in range(amount):
+            categories.append(stored_category_factory(name=faker.word()))
+        return categories
+    return factory
