@@ -165,6 +165,141 @@ class HamsterDBusService(dbus.service.Object):
         """
         return [(category.pk, category.name) for category in self.controler.categories.get_all()]
 
+    # Activity Methods
+    @dbus.service.method(DBUS_SERVICE_NAME, in_signature='si', out_signature = 'i')
+    def AddActivity(self, name, category_pk=-1):
+        """
+        Add a new activity.
+
+        Args:
+            name (str): Name of the new activity
+            category_pk (int): PK or -1 (None) of the category for this
+            new activity
+
+        Returns:
+            int: PK of the new activity.
+
+        Note:
+            If we the passed name/category combination already exists we play
+            along and return the existing instances pk. This is due to legacy behaviour.
+        """
+
+        if category_pk >= 0:
+            category = self.controler.store.categories.get(category_pk)
+        else:
+            category = None
+        activity = Activity(name, category=category)
+        result = self.controler.store.activities.get_or_create(activity)
+        self.activities_changed()
+        return result
+
+    # [TODO] This as well does not allow for feedback!
+    @dbus.service.method(DBUS_SERVICE_NAME, in_signature='isi')
+    def UpdateActivity(self, pk, name, category_pk):
+        """
+        Update an existing activities values.
+
+        Args:
+            pk (int): PK of the activity to be updated.
+            name (str): New name of the activity.
+            category_id (int): PK of the associated category. -1 if None.
+
+        Returns:
+            Nothing
+        """
+        # [TODO]
+        # Add sanity checks for name and PKs. Breaks API!
+
+        if category_pk:
+            if category_pk >= 0:
+                category = self.controler.store.categories.get(category_pk)
+            else:
+                category = None
+
+        activity = self.controler.store.activities.get(pk)
+        activity.name = name
+        activity.category = category
+
+        self.controler.store.activities.save(activity)
+        self.activities_changed()
+
+    @dbus.service.method(DBUS_SERVICE_NAME, in_signature='i')
+    def RemoveActivity(self, pk):
+        """Remove an activity.
+
+        Args:
+            pk (int): PK of the activity to be removed.
+
+        Returns:
+            Nothing.
+        """
+        activity = self.controler.store.activities.get(pk)
+        self.controler.store.activities.delete(activity)
+        self.activities_changed()
+
+    @dbus.service.method(DBUS_SERVICE_NAME, in_signature='s', out_signature='a(ss)')
+    def GetActivities(self, search_term):
+        """
+        Return a list of activities ready for consumption by autocomplete.
+
+        Args:
+            search_term (str):
+
+        Returns:
+            list: List of (activity.name, activity.category.name) tuples where each
+                tuple represents a matched activity. If an ``category``
+                is ``None`` it is represented by an ``empty string``.
+                Results are ordered by the mosts recent start time and
+                ``lower(activity.name)`` as well as capped at 50 hits.
+        """
+        activities = []
+        for activity in self.controler.store.get_all(search_term=search_term):
+            if activity.category is None:
+                category = ''
+            else:
+                category = activity.category.name
+            activities.append(activity.name, category)
+        return activities
+
+    @dbus.service.method(DBUS_SERVICE_NAME, in_signature='sib', out_signature='a{sv}')
+    def GetActivityByName(self, activity_name, category_pk, resurrect):
+        """
+        Get the most recent, preferably non deleted, activity by it's name.
+
+        Args:
+            activity (str): ???
+            category_pk (int): PK of the activivties category. -1 for None.
+            resurrect (bool): ???
+
+        Returns:
+            dict: Dictionary with the following stucture or ``{}`` if no such
+            name/category combination was found.::
+
+                    {
+                    'id': activity.pk,
+                    'name': activity.name,
+                    'deleted': activity: deleted,
+                    'category': activity.category.name
+                    }
+        """
+        # [TODO]
+        # Regarding legacy implementation: why 'preferably delted'? Each name/category
+        # combination is unique isn't it? As such there should be no two instance
+        # where one is deleted and one not.
+        activity = self.activities.get_by_composite(activity_name, category_pk)
+        # [FIXME]
+        # Handle resurrection
+        # [FIXME]
+        # Handle ``activity.category=None``
+        category = self.controler.store.categories.get(category_pk)
+        activity = self.controler.store.activities.get_by_composite(activity_name, category)
+        return {'id': activity.pk,
+                'name': activity.name,
+                'deleted': activity.deleted,
+                'category': activity.category.name
+                }
+
+
 
 
     # Helpers
