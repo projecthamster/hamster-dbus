@@ -62,3 +62,83 @@ class TestGeneralMethods(object):
         assert len(result) == 5
         for category in categories:
             assert (category.pk, category.name) in result
+
+
+class TestActivityMethods(object):
+    """Make sure ``Activity`` related methods work as intended."""
+
+    def test_add_activity(self, store, hamster_interface, activity, stored_category):
+        """Make sure that passed ``Activity`` gets stored properly, including its category."""
+        new_pk = hamster_interface.AddActivity(activity.name, stored_category.pk)
+        assert new_pk > 0
+        result = store.activities.get(new_pk)
+        assert result.name == activity.name
+        assert result.category == stored_category
+
+    def test_add_activity_without_category(self, store, hamster_interface, activity):
+        """Make sure that ``Activity.category = None`` works as expected."""
+        new_pk = hamster_interface.AddActivity(activity.name, -1)
+        assert new_pk > 0
+        result = store.activities.get(new_pk)
+        assert result.name == activity.name
+        assert result.category is None
+
+    def test_update_activity_name(self, store, hamster_interface, stored_activity):
+        """Make sure updating ``Activity.name`` works as expected."""
+        new_name = 'foobar' + stored_activity.name
+        category_pk = stored_activity.category.pk
+        result = hamster_interface.UpdateActivity(stored_activity.pk, new_name, category_pk)
+        assert result is None
+        result = store.activities.get(stored_activity.pk)
+        assert result.name == new_name
+        assert result.category == stored_activity.category
+
+    def test_update_activity_category(self, store, hamster_interface, stored_activity,
+            stored_category):
+        """Make sure that updateing ``Activity.category`` with a different category works."""
+        assert stored_activity.category != stored_category
+        result = hamster_interface.UpdateActivity(stored_activity.pk, stored_activity.name,
+            stored_category.pk)
+        assert result is None
+        result = store.activities.get(stored_activity.pk)
+        assert result.category == stored_category
+
+    def test_update_activity_category_none(self, store, hamster_interface, stored_activity):
+        """Make sure that we can deal with ``category=None`` properly."""
+        assert stored_activity.category is not None
+        result = hamster_interface.UpdateActivity(stored_activity.pk, stored_activity.name, -1)
+        assert result is None
+        result = store.activities.get(stored_activity.pk)
+        assert result.category is None
+
+    def test_remove_activity(self, store, hamster_interface, stored_activity):
+        """Make sure that the passed activity is actually removed."""
+        result = hamster_interface.RemoveActivity(stored_activity.pk)
+        assert result is None
+        with pytest.raises(KeyError):
+            store.activities.get(stored_activity.pk)
+
+    @pytest.mark.xfail(reason='Missing hamsterlib API support. See #134.')
+    def test_get_activities(self, store, hamster_interface, stored_activity):
+        result = hamster_interface.GetActivities(category=stored_activity.category)
+        assert len(store.activities.get_all(category=stored_activity.category)) == 1
+        assert len(result) == 1
+
+    def test_get_activity_by_name(self, store, hamster_interface, stored_activity):
+        """Make sure we can look up an ``Activity`` by its ``name/categor`` composite key."""
+        result = hamster_interface.GetActivityByName(stored_activity.name,
+            stored_activity.category.pk, True)
+        assert result['id'] == stored_activity.pk
+        assert result['name'] == stored_activity.name
+        assert result['deleted'] == stored_activity.deleted
+        assert result['category'] == stored_activity.category.name
+
+    def test_get_activity_by_name_no_category(self, store, hamster_interface,
+            stored_activity_factory):
+        """Make sure we can look up an ``Activity`` by its composite key if ``category=None``."""
+        activity = stored_activity_factory(category=None)
+        result = hamster_interface.GetActivityByName(activity.name, -1, True)
+        assert result['id'] == activity.pk
+        assert result['name'] == activity.name
+        assert result['deleted'] == activity.deleted
+        assert result['category'] == 'unsorted category'

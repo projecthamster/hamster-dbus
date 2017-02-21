@@ -97,25 +97,23 @@ def hamster_service(request, controler, session_bus):
     import multiprocessing
     def run_service(controler):
         """Set up the mainloop and instanciate our dbus service class."""
+        GObject.threads_init()
         DBusGMainLoop(set_as_default=True)
         loop = GLib.MainLoop()
         service = HamsterDBusService(controler=controler)
-        #q.put(service)
         loop.run()
+
     def fin():
         """Shutdown the mainloop process."""
         process.terminate()
-    #q = multiprocessing.Queue()
+
     process = multiprocessing.Process(target=run_service, args=(controler,))
     process.start()
     process.join(1)
     # Make sure we give it time to launch. Otherwise clients may query to early.
-    time.sleep(0.5)
+    time.sleep(1)
     request.addfinalizer(fin)
-    #qu = q.get()
-    #print(qu)
     return process
-
 
 
 @pytest.fixture
@@ -125,7 +123,6 @@ def hamster_interface(request, session_bus, hamster_service):
 
 
 # Data
-
 @pytest.fixture(params=[
     fauxfactory.gen_utf8(),
     fauxfactory.gen_latin1(),
@@ -135,18 +132,19 @@ def category_name_parametrized(request):
     return request.param
 
 
-# Stored instances
+# Stored instances and factories
 @pytest.fixture
 def stored_category_factory(request, store, category_factory, faker):
     def factory(**kwargs):
-        print(kwargs)
-        category = category_factory.build(**kwargs)
+        category = category_factory.build(name=faker.word())
         return store.categories.save(category)
     return factory
+
 
 @pytest.fixture
 def stored_category(request, stored_category_factory):
     return stored_category_factory()
+
 
 @pytest.fixture
 def stored_category_batch_factory(request, stored_category_factory, faker):
@@ -155,4 +153,27 @@ def stored_category_batch_factory(request, stored_category_factory, faker):
         for i in range(amount):
             categories.append(stored_category_factory(name=faker.word()))
         return categories
+    return factory
+
+
+@pytest.fixture
+def stored_activity_factory(request, store, activity_factory):
+    def factory(**kwargs):
+        activity = activity_factory.build(**kwargs)
+        return store.activities.save(activity)
+    return factory
+
+
+@pytest.fixture
+def stored_activity(request, stored_activity_factory):
+    return stored_activity_factory()
+
+
+@pytest.fixture
+def stored_activity_batch_factory(request, stored_activity_factory, faker):
+    def factory(amount):
+        activities = []
+        for i in range(amount):
+            activities.append(stored_activity_factory(name=faker.word()))
+        return activities
     return factory
