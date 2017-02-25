@@ -4,22 +4,22 @@ import datetime
 
 import factory
 import faker
-import hamsterlib
+import hamster_lib
 import fauxfactory
 
 
 class CategoryFactory(factory.Factory):
-    """Provide a factory for randomized ``hamsterlib.Category`` instances."""
+    """Provide a factory for randomized ``hamster_lib.Category`` instances."""
 
     pk = None
     name = fauxfactory.gen_utf8()
 
     class Meta:
-        model = hamsterlib.Category
+        model = hamster_lib.Category
 
 
 class ActivityFactory(factory.Factory):
-    """Provide a factory for randomized ``hamsterlib.Activity`` instances."""
+    """Provide a factory for randomized ``hamster_lib.Activity`` instances."""
 
     pk = None
     name = fauxfactory.gen_utf8()
@@ -27,17 +27,17 @@ class ActivityFactory(factory.Factory):
     deleted = False
 
     class Meta:
-        model = hamsterlib.Activity
+        model = hamster_lib.Activity
 
 
 class FactFactory(factory.Factory):
-    """Provide a factory for randomized ``hamsterlib.Fact`` instances."""
+    """Provide a factory for randomized ``hamster_lib.Fact`` instances."""
 
     pk = None
     activity = factory.SubFactory(ActivityFactory)
-    start = faker.Faker().date_time()
-    end = start + datetime.timedelta(hours=3)
-    description = factory.Faker('paragraph')
+    start = factory.Faker('date_time')
+    end = factory.LazyAttribute(lambda o: o.start + datetime.timedelta(hours=3))
+    description = 'a'#factory.Faker('paragraph')
 
     class Meta:
-        model = hamsterlib.Fact
+        model = hamster_lib.Fact

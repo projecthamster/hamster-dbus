@@ -11,8 +11,9 @@ from pytest_factoryboy import register
 import datetime
 import fauxfactory
 
-from hamster_dbus.hamster_dbus import HamsterDBusService
-import hamsterlib
+from hamster_dbus.hamster_dbus import objects
+
+import hamster_lib
 from . import factories
 
 register(factories.CategoryFactory)
@@ -33,14 +34,14 @@ def config(request, tmpdir):
 
 
 @pytest.fixture
-def controler(request, config):
-    return hamsterlib.HamsterControl(config)
+def controller(request, config):
+    return hamster_lib.HamsterControl(config)
 
 
 @pytest.fixture
-def store(request, controler):
-    """Just for the convenience of accessing our controlers store faster."""
-    return controler.store
+def store(request, controller):
+    """Just for the convenience of accessing our controllers store faster."""
+    return controller.store
 
 
 @pytest.fixture
@@ -70,7 +71,7 @@ def init_session_bus(request):
 
 
 @pytest.fixture
-def session_bus(init_session_bus):
+def session_bus(init_session_bus, scope='session'):
     """
     Provide the session bus instance.
 
@@ -83,11 +84,11 @@ def session_bus(init_session_bus):
 
 
 @pytest.fixture
-def hamster_service(request, controler, session_bus):
+def hamster_service(request, controller, session_bus, scope='session'):
     """
     This works as intended.
 
-    We delegate loop setup and service instanciation to a new subprocess.
+    We delegate loop setup and service instantiation to a new subprocess.
     Unline many examples we do not use ``process.join()`` as this would block our
     process indefinitly.
     Using pytest teardown mechanics will make sure we shut down the spawned process
@@ -95,35 +96,72 @@ def hamster_service(request, controler, session_bus):
     solution.
     """
     import multiprocessing
-    def run_service(controler):
+    def run_service(controller):
         """Set up the mainloop and instanciate our dbus service class."""
-        GObject.threads_init()
         DBusGMainLoop(set_as_default=True)
         loop = GLib.MainLoop()
-        service = HamsterDBusService(controler=controler)
+        objects.HamsterDBus(loop)
+        objects.CategoryManager(controller)
+        objects.ActivityManager(controller)
+        objects.FactManager(controller)
         loop.run()
 
     def fin():
         """Shutdown the mainloop process."""
         process.terminate()
 
-    process = multiprocessing.Process(target=run_service, args=(controler,))
+    process = multiprocessing.Process(target=run_service, args=(controller,))
     process.start()
     process.join(1)
     # Make sure we give it time to launch. Otherwise clients may query to early.
-    time.sleep(1)
+    time.sleep(0.5)
     request.addfinalizer(fin)
     return process
 
 
 @pytest.fixture
-def hamster_interface(request, session_bus, hamster_service):
-    """Provide a covenient interface hook to our hamster-dbus service."""
-    return session_bus.get_object('org.gnome.hamster_dbus', '/org/gnome/hamster_dbus')
+def hamster_dbus(request, session_bus, hamster_service, scope='session'):
+    """Provide a covenient object hook to our hamster-dbus service."""
+    object_ = session_bus.get_object('org.projecthamster.HamsterDBus',
+        '/org/projecthamster/HamsterDBus')
+    interface = dbus.Interface(object_,
+        dbus_interface = 'org.projecthamster.HamsterDBus')
+    return interface
+
+
+@pytest.fixture
+def category_manager(request, session_bus, hamster_service):
+    """Provide a covenient object hook to our hamster-dbus service."""
+    object_ = session_bus.get_object('org.projecthamster.HamsterDBus',
+        '/org/projecthamster/HamsterDBus/CategoryManager')
+    interface = dbus.Interface(object_,
+        dbus_interface = 'org.projecthamster.HamsterDBus.CategoryManager1')
+    return interface
+
+
+@pytest.fixture
+def activity_manager(request, session_bus, hamster_service):
+    """Provide a covenient object hook to our hamster-dbus service."""
+    object_ = session_bus.get_object('org.projecthamster.HamsterDBus',
+        '/org/projecthamster/HamsterDBus/ActivityManager')
+    interface = dbus.Interface(object_,
+        dbus_interface = 'org.projecthamster.HamsterDBus.ActivityManager1')
+    return interface
+
+
+@pytest.fixture
+def fact_manager(request, session_bus, hamster_service):
+    """Provide a covenient object hook to our hamster-dbus service."""
+    object_ = session_bus.get_object('org.projecthamster.HamsterDBus',
+        '/org/projecthamster/HamsterDBus/FactManager')
+    interface = dbus.Interface(object_,
+        dbus_interface = 'org.projecthamster.HamsterDBus.FactManager1')
+    return interface
 
 
 # Data
 @pytest.fixture(params=[
+    fauxfactory.gen_alpha(),
     fauxfactory.gen_utf8(),
     fauxfactory.gen_latin1(),
     fauxfactory.gen_cjk(),
@@ -132,11 +170,21 @@ def category_name_parametrized(request):
     return request.param
 
 
-# Stored instances and factories
+@pytest.fixture(params=[
+    fauxfactory.gen_alpha(),
+    fauxfactory.gen_utf8(),
+    fauxfactory.gen_latin1(),
+    fauxfactory.gen_cjk(),
+])
+def activity_name_parametrized(request):
+    return request.param
+
+
+# Stored instances
 @pytest.fixture
 def stored_category_factory(request, store, category_factory, faker):
     def factory(**kwargs):
-        category = category_factory.build(name=faker.word())
+        category = category_factory.build(**kwargs)
         return store.categories.save(category)
     return factory
 
@@ -144,7 +192,6 @@ def stored_category_factory(request, store, category_factory, faker):
 @pytest.fixture
 def stored_category(request, stored_category_factory):
     return stored_category_factory()
-
 
 @pytest.fixture
 def stored_category_batch_factory(request, stored_category_factory, faker):
@@ -157,7 +204,7 @@ def stored_category_batch_factory(request, stored_category_factory, faker):
 
 
 @pytest.fixture
-def stored_activity_factory(request, store, activity_factory):
+def stored_activity_factory(request, store, activity_factory, faker):
     def factory(**kwargs):
         activity = activity_factory.build(**kwargs)
         return store.activities.save(activity)
@@ -176,4 +223,30 @@ def stored_activity_batch_factory(request, stored_activity_factory, faker):
         for i in range(amount):
             activities.append(stored_activity_factory(name=faker.word()))
         return activities
+    return factory
+
+
+@pytest.fixture
+def stored_fact_factory(request, store, fact_factory, faker):
+    def factory(**kwargs):
+        fact = fact_factory.build(**kwargs)
+        return store.facts.save(fact)
+    return factory
+
+@pytest.fixture
+def stored_fact(request, stored_fact_factory):
+    return stored_fact_factory()
+
+@pytest.fixture
+def stored_fact_batch_factory(request, stored_fact_factory, faker):
+    def factory(amount):
+        facts = []
+        old_start = datetime.datetime.now()
+        offset = datetime.timedelta(hours=4)
+        for i in range(amount):
+            start = old_start + offset
+            fact = stored_fact_factory(start=start)
+            facts.append(fact)
+            old_start = start
+        return facts
     return factory
