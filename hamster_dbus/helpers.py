@@ -50,43 +50,6 @@ def get_config():
     }
 
 
-def _represent_category(category, legacy_mode=False):
-        """
-        Return a string representation of a retrieved category that can be returned via dbus.
-
-        Args:
-            category (hamsterlib.hamster_lib.Category): hamster_lib.Category instance or None.
-            fallback (str): String to represent ``category=None``.
-
-        Returns:
-            str: Name of the passed ``hamster_lib.Category`` or ``empty_string`` to indicate
-                that ``category=None``.
-
-        Quite often we will end up with a situation where we need to check whether a
-        category is ``None`` or is a proper instance with a name. In order to avoid
-        code duplication this is done once in this function.
-        Because the representation logic is specific to our dbus requirements we
-        do not simply adjust ``hamsterlib.hamster_lib.Category.__str__``.
-
-        Legacy hamster does this on the db level by using ``coalesce`` to assign
-        fallback value (``unsorted_localized``). As we opt to leave handling
-        null-categories to the client as its sees fit we need a way to indicate
-        that there is no category name because there is no category. This is
-        done by returning an empty string. However, in order to stay backwards
-        compatible, it is possible to provide a custom fallback (such as legacycy
-        ``unsorted_localized`` in order to handle represenation of ``None``
-        categories by ``dbus-hamster``.
-        """
-        if category:
-            result = category.name
-        else:
-            if legacy_mode:
-                result = 'unsorted category'
-            else:
-                result = ''
-        return result
-
-
 # This is needed because not all types used in ``as_tuple`` can be passed
 # through dbus
 def hamster_to_dbus_category(category):
