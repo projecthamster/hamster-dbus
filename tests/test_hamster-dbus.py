@@ -5,14 +5,11 @@ So far we fail to succeed to patch the controler properly. as a consequencec we
 use the controler to fetch created objects and assume this method works as intended.
 """
 
-import os
 import time
 
-import dbus
 import psutil
 import pytest
 
-import hamster_dbus.hamster_dbus as hamster_dbus
 import hamster_dbus.helpers as helpers
 
 
@@ -33,11 +30,13 @@ class TestGeneralMethods(object):
         time.sleep(2)
         assert psutil.pid_exists(hamster_service.pid) is False
 
+
 class TestCategoryManager(object):
 
     def test_save_new(self, category_manager, category_name_parametrized):
         """Make sure that passing a valid string creates a new category and returns its pk."""
-        dbus_category = helpers.DBusCategory(*category_manager.Save((-1, category_name_parametrized)))
+        dbus_category = helpers.DBusCategory(*category_manager.Save(
+            (-1, category_name_parametrized)))
         assert dbus_category.pk == 1
         assert dbus_category.name == category_name_parametrized
 
@@ -75,6 +74,7 @@ class TestCategoryManager(object):
         for category in categories:
             assert category in result
 
+
 class TestActivityManager(object):
 
     def test_save_new(self, activity_manager, activity):
@@ -108,6 +108,7 @@ class TestActivityManager(object):
         for activity in activities:
             assert activity in result
 
+
 class TestFactManager(object):
 
     def test_save_new(self, fact_manager, fact):
@@ -137,6 +138,6 @@ class TestFactManager(object):
     # [FIXME]
     # This should be expanded
     def test_get_all(self, store, fact_manager, stored_fact_batch_factory):
-        facts = stored_fact_batch_factory(5)
+        stored_fact_batch_factory(5)
         result = fact_manager.GetAll('', '', '')
         assert len(result) == 5

@@ -26,6 +26,7 @@ DBusActivity = namedtuple('DBusActivity', ('pk', 'name', 'category', 'deleted'))
 # 'activity' is supposed to store an ``DBushamster_lib.Activity`` instance.
 DBusFact = namedtuple('DBusFact', ('pk', 'start', 'end', 'description', 'activity', 'tags'))
 
+
 def _none_to_int(value):
     if value is None:
         value = -1

@@ -33,6 +33,8 @@ Capitalization violates PEP8 due to dbus specifications on method names
 # passed over dbus. Future iteration should revisit this and see if we can
 # expose those objects as dbus objects and consequently just pass those.
 
+# If the ``dbus.service.method`` decorator spans multiple lines we need to add
+# the ``   # NOQA`` afterwards instead of the actual function definition.
 from __future__ import absolute_import, unicode_literals
 
 import dbus
@@ -71,7 +73,7 @@ class HamsterDBus(dbus.service.Object):
         )
 
     @dbus.service.method('org.projecthamster.HamsterDBus')
-    def Quit(self):
+    def Quit(self):  # NOQA
         """Shutdown the service."""
         self._loop.quit()
 
@@ -92,8 +94,8 @@ class CategoryManager(dbus.service.Object):
     # Missing ``hamster_lib.CategoryManager`` methods that still need to be implemented:
     # ``get_or_create``.
 
-    @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='(is)', out_signature = '(is)')
-    def Save(self, category_tuple):
+    @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='(is)', out_signature='(is)')
+    def Save(self, category_tuple):  # NOQA
         """
         Save category.
 
@@ -108,7 +110,7 @@ class CategoryManager(dbus.service.Object):
         return helpers.hamster_to_dbus_category(category)
 
     @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='i')
-    def Remove(self, pk):
+    def Remove(self, pk):  # NOQA
         """
         Remove a category.
 
@@ -126,7 +128,7 @@ class CategoryManager(dbus.service.Object):
         return None
 
     @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='s', out_signature='(is)')
-    def GetByName(self, name):
+    def GetByName(self, name):  # NOQA
         """
         Look up a category by its name and return its PK.
 
@@ -140,7 +142,7 @@ class CategoryManager(dbus.service.Object):
         return helpers.hamster_to_dbus_category(category)
 
     @dbus.service.method(DBUS_CATEGORIES_INTERFACE, out_signature='a(is)')
-    def GetAll(self):
+    def GetAll(self):  # NOQA
         """
         Get all categories.
 
@@ -163,7 +165,8 @@ class ActivityManager(dbus.service.Object):
             object_path='/org/projecthamster/HamsterDBus/ActivityManager',
         )
 
-    @dbus.service.method(DBUS_ACTIVITIES_INTERFACE, in_signature='(is(is)b)', out_signature='(is(is)b)')
+    @dbus.service.method(DBUS_ACTIVITIES_INTERFACE, in_signature='(is(is)b)',
+        out_signature='(is(is)b)')  # NOQA
     def Save(self, activity_tuple):
         """
         Save an activity.
@@ -178,11 +181,11 @@ class ActivityManager(dbus.service.Object):
         result = self._controller.activities.save(activity)
 
         # [FIXME]
-        #self.activities_changed()
+        # self.activities_changed()
         return helpers.hamster_to_dbus_activity(result)
 
     @dbus.service.method(DBUS_ACTIVITIES_INTERFACE, in_signature='i')
-    def Remove(self, pk):
+    def Remove(self, pk):  # NOQA
         """Remove an activity.
 
         Args:
@@ -195,11 +198,11 @@ class ActivityManager(dbus.service.Object):
         self._controller.activities.remove(activity)
 
         # [FIXME]
-        #self.activities_changed()
+        # self.activities_changed()
         return None
 
     @dbus.service.method(DBUS_ACTIVITIES_INTERFACE, in_signature='i', out_signature='(is(is)b)')
-    def Get(self, pk):
+    def Get(self, pk):  # NOQA
         """
         Retrieve an ``hamster_lib.Activity`` based on it's PK.
 
@@ -213,14 +216,15 @@ class ActivityManager(dbus.service.Object):
         return helpers.hamster_to_dbus_activity(activity)
 
     @dbus.service.method(DBUS_ACTIVITIES_INTERFACE, in_signature='i',
-        out_signature='a(is(is)b)')
+        out_signature='a(is(is)b)')  # NOQA
     def GetAll(self, category_pk):
         """
         Retrieve all ``hamster_lib.Activity`` instances that match the criteria.
 
         Args:
-            category_pk (int): hamster_lib.Category pk. Use ``-1`` for ``None`` and ``-2`` for ``False``.
-                Refer to ``hamster_lib.storage.hamster_lib.ActivityManager.get_all`` for details.
+            category_pk (int): hamster_lib.Category pk. Use ``-1`` for ``None`` and ``-2`` for
+                ``False``. Refer to ``hamster_lib.storage.hamster_lib.ActivityManager.get_all``
+                for details.
 
         Returns:
             tuple: (activity_tuple, error).
@@ -249,7 +253,8 @@ class FactManager(dbus.service.Object):
             object_path='/org/projecthamster/HamsterDBus/FactManager',
         )
 
-    @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='s', out_signature='(isss(is(is)b)a(is))')
+    @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='s',
+        out_signature='(isss(is(is)b)a(is))')  # NOQA
     def SaveRaw(self, raw_fact):
         """
         Take a raw_fact save it to our backend.
@@ -258,7 +263,8 @@ class FactManager(dbus.service.Object):
             raw_fact (str): ``raw fact`` string.
 
         Returns:
-            tuple (DBushamster_lib.Fact): Serialized version of the saved ``hamster_lib.Fact`` instance.
+            tuple (DBushamster_lib.Fact): Serialized version of the saved ``hamster_lib.Fact``
+            instance.
 
         Note: This method is identical to ``Savehamster_lib.Fact`` with the only difference being
             that it takes a ``raw fact`` instead of a serialized ``hamster_lib.Fact`` instance.
@@ -271,7 +277,8 @@ class FactManager(dbus.service.Object):
 
         return helpers.hamster_to_dbus_fact(result)
 
-    @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='(isss(is(is)b)a(is))', out_signature='(isss(is(is)b)a(is))')
+    @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='(isss(is(is)b)a(is))',
+        out_signature='(isss(is(is)b)a(is))')  # NOQA
     def Save(self, fact_tuple):
         """
         Take a fact save it to our backend.
@@ -280,7 +287,8 @@ class FactManager(dbus.service.Object):
             fact_tuple (DBushamster_lib.Fact): ``hamster_lib.Fact`` to be saved.
 
         Returns:
-            tuple (DBushamster_lib.Fact): Serialized version of the saved ``hamster_lib.Fact`` instance.
+            tuple (DBusFact): Serialized version of the saved ``hamster_lib.Fact``
+                instance.
         """
         fact = helpers.dbus_to_hamster_fact(fact_tuple)
         result = self._controller.store.facts.save(fact)
@@ -291,7 +299,7 @@ class FactManager(dbus.service.Object):
         return helpers.hamster_to_dbus_fact(result)
 
     @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='i')
-    def Remove(self, fact_pk):
+    def Remove(self, fact_pk):  # NOQA
         """
         Remove fact from storage by it's PK.
 
@@ -310,7 +318,8 @@ class FactManager(dbus.service.Object):
         #    self.facts_changed()
         return None
 
-    @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='i', out_signature='(isss(is(is)b)a(is))')
+    @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='i',
+        out_signature='(isss(is(is)b)a(is))')  # NOQA
     def Get(self, fact_pk):
         """Get fact by PK.
 
@@ -324,7 +333,7 @@ class FactManager(dbus.service.Object):
         return helpers.hamster_to_dbus_fact(fact)
 
     @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='sss',
-        out_signature='a(isss(is(is)b)a(is))')
+        out_signature='a(isss(is(is)b)a(is))')  # NOQA
     def GetAll(self, start, end, filter_term):
         """
         Get all facts matching criteria.
@@ -332,8 +341,8 @@ class FactManager(dbus.service.Object):
         Args:
             start (int): Unix-timestamp for start of timeframe. ``-1`` for ``None``.
             end (int): Unix-timestamp for end of timeframe. ``-1`` for ``None``.
-            filter_term (str): Only consider ``hamster_lib.Facts`` with this string as part of their
-                associated ``hamster_lib.Activity.name``
+            filter_term (str): Only consider ``hamster_lib.Facts`` with this string as part of
+                their associated ``hamster_lib.Activity.name``
 
         Returns:
             list: A list of ``helpers.DBushamster_lib.Fact``-tuples.
@@ -359,7 +368,7 @@ class FactManager(dbus.service.Object):
         return [helpers.hamster_to_dbus_fact(fact) for fact in facts]
 
     @dbus.service.method(DBUS_FACTS_INTERFACE, out_signature='a(isss(is(is)b)a(is))')
-    def GetTodays(self):
+    def GetTodays(self):  # NOQA
         """
         Get facts of today, respecting hamster day_start, day_end settings.
 

@@ -3,7 +3,6 @@
 import datetime
 
 import factory
-import faker
 import fauxfactory
 import hamster_lib
 
@@ -36,8 +35,9 @@ class FactFactory(factory.Factory):
     pk = None
     activity = factory.SubFactory(ActivityFactory)
     start = factory.Faker('date_time')
-    end = factory.LazyAttribute(lambda o: o.start + datetime.timedelta(hours=3))
-    description = 'a'#factory.Faker('paragraph')
+    end = factory.LazyAttribute(lambda o: o.start + datetime.timedelta(
+        hours=3))
+    description = factory.Faker('paragraph')
 
     class Meta:
         model = hamster_lib.Fact

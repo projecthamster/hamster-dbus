@@ -54,7 +54,8 @@ def init_session_bus(request):
     """
     Provide a new private session bus so we don't polute the regular one.
 
-    This is a straight copy of: https://github.com/martinpitt/python-dbusmock/blob/master/dbusmock/testcase.py#L92
+    This is a straight copy of:
+        https://github.com/martinpitt/python-dbusmock/blob/master/dbusmock/testcase.py#L92
 
     Returns:
         tuple: (pid, address) pair.
@@ -80,7 +81,8 @@ def session_bus(init_session_bus, scope='session'):
     """
     Provide the session bus instance.
 
-    Adapted from: https://github.com/martinpitt/python-dbusmock/blob/master/dbusmock/testcase.py#L137
+    Adapted from:
+        https://github.com/martinpitt/python-dbusmock/blob/master/dbusmock/testcase.py#L137
     """
     if os.environ.get('DBUS_SESSION_BUS_ADDRESS'):
         return dbus.bus.BusConnection(os.environ['DBUS_SESSION_BUS_ADDRESS'])
@@ -129,7 +131,7 @@ def hamster_dbus(request, session_bus, hamster_service, scope='session'):
     object_ = session_bus.get_object('org.projecthamster.HamsterDBus',
         '/org/projecthamster/HamsterDBus')
     interface = dbus.Interface(object_,
-        dbus_interface = 'org.projecthamster.HamsterDBus')
+        dbus_interface='org.projecthamster.HamsterDBus')
     return interface
 
 
@@ -139,7 +141,7 @@ def category_manager(request, session_bus, hamster_service):
     object_ = session_bus.get_object('org.projecthamster.HamsterDBus',
         '/org/projecthamster/HamsterDBus/CategoryManager')
     interface = dbus.Interface(object_,
-        dbus_interface = 'org.projecthamster.HamsterDBus.CategoryManager1')
+        dbus_interface='org.projecthamster.HamsterDBus.CategoryManager1')
     return interface
 
 
@@ -149,7 +151,7 @@ def activity_manager(request, session_bus, hamster_service):
     object_ = session_bus.get_object('org.projecthamster.HamsterDBus',
         '/org/projecthamster/HamsterDBus/ActivityManager')
     interface = dbus.Interface(object_,
-        dbus_interface = 'org.projecthamster.HamsterDBus.ActivityManager1')
+        dbus_interface='org.projecthamster.HamsterDBus.ActivityManager1')
     return interface
 
 
@@ -159,7 +161,7 @@ def fact_manager(request, session_bus, hamster_service):
     object_ = session_bus.get_object('org.projecthamster.HamsterDBus',
         '/org/projecthamster/HamsterDBus/FactManager')
     interface = dbus.Interface(object_,
-        dbus_interface = 'org.projecthamster.HamsterDBus.FactManager1')
+        dbus_interface='org.projecthamster.HamsterDBus.FactManager1')
     return interface
 
 
@@ -247,10 +249,12 @@ def stored_fact_factory(request, store, fact_factory, faker):
         return store.facts.save(fact)
     return factory
 
+
 @pytest.fixture
 def stored_fact(request, stored_fact_factory):
     """A singe persistant fact instances."""
     return stored_fact_factory()
+
 
 @pytest.fixture
 def stored_fact_batch_factory(request, stored_fact_factory, faker):
