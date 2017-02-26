@@ -13,7 +13,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/elbenfreund/hamster-dbus/issues.
+Report bugs at https://projecthamster.atlassian.net/projects/DBUS/issues/.
 
 If you are reporting a bug, please include:
 
@@ -24,26 +24,26 @@ If you are reporting a bug, please include:
 Fix Bugs
 ~~~~~~~~
 
-Look through the GitHub issues for bugs. Anything tagged with "bug"
+Look through the issues for bugs. Anything with the type "bug"
 is open to whoever wants to implement it.
 
 Implement Features
 ~~~~~~~~~~~~~~~~~~
 
-Look through the GitHub issues for features. Anything tagged with "feature"
+Look through the issues for features. Anything typed as a "story" or "task"
 is open to whoever wants to implement it.
 
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-hamster-dbus could always use more documentation, whether as part of the
-official hamster-dbus docs, in docstrings, or even on the web in blog posts,
-articles, and such.
+``hamster-dbus`` could always use more documentation, whether as part of the
+official ``hamster-dbus`` docs, in docstrings, or even on the web in blog
+posts, articles, and such.
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/elbenfreund/hamster-dbus/issues.
+The best way to send feedback is to file an issue at https://projecthamster.atlassian.net/projects/DBUS/issues/.
 
 If you are proposing a feature:
 
