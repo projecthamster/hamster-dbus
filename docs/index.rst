@@ -18,6 +18,7 @@ Contents:
    authors
    packaging
    history
+   modules
 
 Indices and tables
 ==================
