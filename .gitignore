@@ -61,3 +61,11 @@ kmncms/static/bundles-development
 
 # Sphinx
 docs/_build
+
+# Vim swapfiles
+.*.sw[po]
+
+# Sphinx documentation
+docs/_build/
+docs/modules.rst
+docs/hamster_dbus.*

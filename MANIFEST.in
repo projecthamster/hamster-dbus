@@ -9,9 +9,10 @@ include .editorconfig
 
 recursive-include tests *
 recursive-include requirements *.pip
+recursive-include docs *.rst conf.py Makefile make.bat
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 recursive-exclude * .*.sw?
+recursive-exclude docs hamster_dbus.* modules.rst
 
 
-recursive-include docs *.rst conf.py Makefile make.bat
