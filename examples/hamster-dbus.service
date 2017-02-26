@@ -1,0 +1,20 @@
+# This is an example for a dbus service file.  This file can be used to expose
+# your ``hamster_dbus.py`` service executeable to dbus.  This way the services
+# methods can be accessed via dbus without the need to explicitly start the
+# service in advance.  In order to 'register' this service file with dbus just
+# copy it in its ``servicedir`` location.  The default usually being
+# ``/usr/share/dbus-1/services/``.  DBus should pick up on the new service
+# automatically, so there should not be a need for restarting it.
+#
+# Please be advised that you will need to adjust the last line of this file
+# with the location of the actual service executeable. As we (in the context of
+# this generic example) have no way of knowing where this is located you need
+# to provide this information.
+#
+# For more on this see:
+# - https://www.freedesktop.org/wiki/IntroductionToDBus/
+# - http://raphael.slinckx.net/blog/documents/dbus-tutorial
+
+[D-BUS Service]
+Names=org.projecthamster.DBusHamster;org.projecthamster.DBusHamster.CategoryManager;org.projecthamster.DBusHamster.ActivityManager;org.projecthamster.DBusHamster.FactManager;
+Exec=PATH_TO_HAMSTER_DBUS_EXPECUTEABLE
