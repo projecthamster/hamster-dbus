@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""Provide a trivial service implementation to export ``hamster-lib`` functionality."""
+
 # This file is part of 'hamster-dbus'.
 #
 # 'hamster-dbus' is free software: you can redistribute it and/or modify

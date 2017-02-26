@@ -1,5 +1,7 @@
+"""General fixtures."""
+
 import datetime
-import errno
+import multiprocessing
 import os
 import signal
 import subprocess
@@ -10,7 +12,7 @@ import fauxfactory
 import hamster_lib
 import pytest
 from dbus.mainloop.glib import DBusGMainLoop
-from gi.repository import GLib, GObject, Gtk
+from gi.repository import GLib
 from pytest_factoryboy import register
 
 from hamster_dbus.hamster_dbus import objects
@@ -24,6 +26,7 @@ register(factories.FactFactory)
 
 @pytest.fixture()
 def config(request, tmpdir):
+    """A mocked up config."""
     return {
         'store': 'sqlalchemy',
         'day_start': datetime.time(5, 30, 0),
@@ -36,6 +39,7 @@ def config(request, tmpdir):
 
 @pytest.fixture
 def controller(request, config):
+    """A hamster-lib controller instance that."""
     return hamster_lib.HamsterControl(config)
 
 
@@ -87,7 +91,7 @@ def session_bus(init_session_bus, scope='session'):
 @pytest.fixture
 def hamster_service(request, controller, session_bus, scope='session'):
     """
-    This works as intended.
+    Provide a dedicated serice that exposes our objects to be tested.
 
     We delegate loop setup and service instantiation to a new subprocess.
     Unline many examples we do not use ``process.join()`` as this would block our
@@ -96,7 +100,6 @@ def hamster_service(request, controller, session_bus, scope='session'):
     afterwards. This is where ``multiprocessing`` surpasses our ``threading`` based
     solution.
     """
-    import multiprocessing
     def run_service(controller):
         """Set up the mainloop and instanciate our dbus service class."""
         DBusGMainLoop(set_as_default=True)
@@ -168,6 +171,7 @@ def fact_manager(request, session_bus, hamster_service):
     fauxfactory.gen_cjk(),
 ])
 def category_name_parametrized(request):
+    """Provide a huge variety of possible ``Category.name`` strings."""
     return request.param
 
 
@@ -178,12 +182,14 @@ def category_name_parametrized(request):
     fauxfactory.gen_cjk(),
 ])
 def activity_name_parametrized(request):
+    """Provide a huge variety of possible ``Activity.name`` strings."""
     return request.param
 
 
 # Stored instances
 @pytest.fixture
 def stored_category_factory(request, store, category_factory, faker):
+    """A factory for category instances that are present in our persistant store."""
     def factory(**kwargs):
         category = category_factory.build(**kwargs)
         return store.categories.save(category)
@@ -192,10 +198,13 @@ def stored_category_factory(request, store, category_factory, faker):
 
 @pytest.fixture
 def stored_category(request, stored_category_factory):
+    """A singe persistant category instances."""
     return stored_category_factory()
+
 
 @pytest.fixture
 def stored_category_batch_factory(request, stored_category_factory, faker):
+    """A factory for category instances that are present in our persistant store."""
     def factory(amount):
         categories = []
         for i in range(amount):
@@ -206,6 +215,7 @@ def stored_category_batch_factory(request, stored_category_factory, faker):
 
 @pytest.fixture
 def stored_activity_factory(request, store, activity_factory, faker):
+    """A factory for activity instances that are present in our persistant store."""
     def factory(**kwargs):
         activity = activity_factory.build(**kwargs)
         return store.activities.save(activity)
@@ -214,11 +224,13 @@ def stored_activity_factory(request, store, activity_factory, faker):
 
 @pytest.fixture
 def stored_activity(request, stored_activity_factory):
+    """A singe persistant activity instances."""
     return stored_activity_factory()
 
 
 @pytest.fixture
 def stored_activity_batch_factory(request, stored_activity_factory, faker):
+    """Factory for batch creating persistant activity instances."""
     def factory(amount):
         activities = []
         for i in range(amount):
@@ -229,6 +241,7 @@ def stored_activity_batch_factory(request, stored_activity_factory, faker):
 
 @pytest.fixture
 def stored_fact_factory(request, store, fact_factory, faker):
+    """A factory for fact instances that are present in our persistant store."""
     def factory(**kwargs):
         fact = fact_factory.build(**kwargs)
         return store.facts.save(fact)
@@ -236,10 +249,12 @@ def stored_fact_factory(request, store, fact_factory, faker):
 
 @pytest.fixture
 def stored_fact(request, stored_fact_factory):
+    """A singe persistant fact instances."""
     return stored_fact_factory()
 
 @pytest.fixture
 def stored_fact_batch_factory(request, stored_fact_factory, faker):
+    """Factory for batch creating persistant fact instances."""
     def factory(amount):
         facts = []
         old_start = datetime.datetime.now()

@@ -62,6 +62,7 @@ class HamsterDBus(dbus.service.Object):
     # [FIXME]
     # 'controller still needed?
     def __init__(self, loop):
+        """Initialize main DBus object."""
         self._loop = loop
 
         super(HamsterDBus, self).__init__(
@@ -76,8 +77,10 @@ class HamsterDBus(dbus.service.Object):
 
 
 class CategoryManager(dbus.service.Object):
+    """CategoryManager object to be exposed via DBus."""
 
     def __init__(self, controller):
+        """Initialize category manager object."""
         self._controller = controller
 
         super(CategoryManager, self).__init__(
@@ -149,8 +152,10 @@ class CategoryManager(dbus.service.Object):
 
 
 class ActivityManager(dbus.service.Object):
+    """ActivityManager object to be exposed via DBus."""
 
     def __init__(self, controller):
+        """Initialize activity manager object."""
         self._controller = controller
 
         super(ActivityManager, self).__init__(
@@ -233,8 +238,10 @@ class ActivityManager(dbus.service.Object):
 
 
 class FactManager(dbus.service.Object):
+    """FactManager object to be exposed via DBus."""
 
     def __init__(self, controller):
+        """Initialize fact manager object."""
         self._controller = controller
 
         super(FactManager, self).__init__(
@@ -286,7 +293,7 @@ class FactManager(dbus.service.Object):
     @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='i')
     def Remove(self, fact_pk):
         """
-        Remove fact from storage by it's PK
+        Remove fact from storage by it's PK.
 
         Args:
             fact_pk (int): PK of the fact to be removed.
@@ -295,17 +302,17 @@ class FactManager(dbus.service.Object):
             None: Nothing.
         """
         fact = self._controller.store.facts.get(fact_pk)
-        result = self._controller.store.facts.remove(fact)
+        self._controller.store.facts.remove(fact)
         fact = self._controller.store.facts.get(fact_pk)
 
         # [FIXME]
-        #if result:
+        # if result:
         #    self.facts_changed()
         return None
 
     @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='i', out_signature='(isss(is(is)b)a(is))')
     def Get(self, fact_pk):
-        """Get fact by id..
+        """Get fact by PK.
 
         Args:
             fact_pk (int): PK of the fact to be retrieved.
@@ -313,7 +320,6 @@ class FactManager(dbus.service.Object):
         Returns:
             DBushamster_lib.Fact: Serialized ``hamster_lib.Fact`` instance.
         """
-
         fact = self._controller.facts.get(fact_pk)
         return helpers.hamster_to_dbus_fact(fact)
 
@@ -321,7 +327,7 @@ class FactManager(dbus.service.Object):
         out_signature='a(isss(is(is)b)a(is))')
     def GetAll(self, start, end, filter_term):
         """
-        Gets all facts matching criteria.
+        Get all facts matching criteria.
 
         Args:
             start (int): Unix-timestamp for start of timeframe. ``-1`` for ``None``.
@@ -355,7 +361,7 @@ class FactManager(dbus.service.Object):
     @dbus.service.method(DBUS_FACTS_INTERFACE, out_signature='a(isss(is(is)b)a(is))')
     def GetTodays(self):
         """
-        Gets facts of today, respecting hamster day_start, day_end settings.
+        Get facts of today, respecting hamster day_start, day_end settings.
 
         Returns:
             list: A list of ``helpers.DBushamster_lib.Fact``-tuples.

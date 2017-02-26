@@ -1,4 +1,3 @@
-
 # This file is part of 'hamster-dbus'.
 #
 # 'hamster-dbus' is free software: you can redistribute it and/or modify
@@ -13,6 +12,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with 'hamster-dbus'.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Helper functions to ease working with dbus objects and type conversion."""
 
 import datetime
 from collections import namedtuple
@@ -48,6 +49,7 @@ def get_config():
         'db_path': ':memory:',
     }
 
+
 def _represent_category(category, legacy_mode=False):
         """
         Return a string representation of a retrieved category that can be returned via dbus.
@@ -75,7 +77,6 @@ def _represent_category(category, legacy_mode=False):
         ``unsorted_localized`` in order to handle represenation of ``None``
         categories by ``dbus-hamster``.
         """
-
         if category:
             result = category.name
         else:
@@ -86,10 +87,10 @@ def _represent_category(category, legacy_mode=False):
         return result
 
 
-
 # This is needed because not all types used in ``as_tuple`` can be passed
 # through dbus
 def hamster_to_dbus_category(category):
+    """Convert a ``hamster_lib.Category`` instance to its DBus representation."""
     def get_pk(category):
         return _none_to_int(category.pk)
 
@@ -103,6 +104,7 @@ def hamster_to_dbus_category(category):
 
 
 def dbus_to_hamster_category(category_tuple):
+    """Return a ``hamster_lib.Category`` from its passed DBus representation."""
     def get_pk(category_tuple):
         pk = category_tuple.pk
         return _int_to_none(pk)
@@ -118,6 +120,7 @@ def dbus_to_hamster_category(category_tuple):
 
 
 def hamster_to_dbus_activity(activity):
+    """Convert a ``hamster_lib.Activity`` instance to it's DBus representation."""
     # (activity.pk, activity.name, (category.pk, category.name),
     # activity.deleted)
     # If activity.category=None we need to encode this information in a way that
@@ -174,6 +177,7 @@ def dbus_to_hamster_activity(activity_tuple):
         category=get_category(activity_tuple),
     )
 
+
 # Note that we currently do not support passing timezone information!
 def hamster_to_dbus_fact(fact):
     """
@@ -187,7 +191,6 @@ def hamster_to_dbus_fact(fact):
     (is(is)b)   activity tuple: (pk, name, category_tuple).
     a(is)       list of tag tuples: (pk, name). pk=-1 -> None
     """
-
     def get_pk(fact):
         return _none_to_int(fact.pk)
 
@@ -228,6 +231,7 @@ def hamster_to_dbus_fact(fact):
 
 
 def dbus_to_hamster_fact(fact_tuple):
+    """Return a ``hamster_lib.Fact`` instance from its DBus representation."""
     def get_pk(fact_tuple):
         return _int_to_none(fact_tuple.pk)
 
