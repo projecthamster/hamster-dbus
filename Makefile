@@ -88,7 +88,7 @@ docs:
 	$(BROWSER) docs/_build/html/index.html
 
 isort:
-	isort --recursive setup.py hamster-bus/ tests/
+	isort --recursive setup.py hamster_dbus/ tests/
 
 
 servedocs: docs

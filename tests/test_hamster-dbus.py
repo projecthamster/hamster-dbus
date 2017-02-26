@@ -5,15 +5,16 @@ So far we fail to succeed to patch the controler properly. as a consequencec we
 use the controler to fetch created objects and assume this method works as intended.
 """
 
-import pytest
 import os
-import dbus
-import psutil
 import time
 
+import dbus
+import psutil
+import pytest
 
 import hamster_dbus.hamster_dbus as hamster_dbus
 import hamster_dbus.helpers as helpers
+
 
 # First attempts towards an approach that mocks the actuall calls to hamster_lib
 # failed because we only have access to proxy instances of our manager classes.

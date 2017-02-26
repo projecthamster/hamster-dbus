@@ -4,8 +4,8 @@ import datetime
 
 import factory
 import faker
-import hamster_lib
 import fauxfactory
+import hamster_lib
 
 
 class CategoryFactory(factory.Factory):

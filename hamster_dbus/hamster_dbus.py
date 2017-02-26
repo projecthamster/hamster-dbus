@@ -16,17 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with  'hamster-dbus'.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals, absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import sys
 
-from gi.repository import GLib
-from dbus.mainloop.glib import DBusGMainLoop
 import hamster_lib
+from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import GLib
 
-from . import objects
-from . import helpers
-
+from . import helpers, objects
 
 if __name__ == '__main__':
     arg = ""

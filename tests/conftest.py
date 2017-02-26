@@ -1,19 +1,20 @@
-import pytest
+import datetime
+import errno
+import os
 import signal
 import subprocess
-import dbus
-import os
-import errno
 import time
+
+import dbus
+import fauxfactory
+import hamster_lib
+import pytest
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib, GObject, Gtk
 from pytest_factoryboy import register
-import datetime
-import fauxfactory
 
 from hamster_dbus.hamster_dbus import objects
 
-import hamster_lib
 from . import factories
 
 register(factories.CategoryFactory)

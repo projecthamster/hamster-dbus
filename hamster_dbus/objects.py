@@ -33,15 +33,13 @@ Capitalization violates PEP8 due to dbus specifications on method names
 # passed over dbus. Future iteration should revisit this and see if we can
 # expose those objects as dbus objects and consequently just pass those.
 
-from __future__ import unicode_literals, absolute_import
+from __future__ import absolute_import, unicode_literals
 
-import hamster_lib
 import dbus
 import dbus.service
+import hamster_lib
 
 from . import helpers
-
-
 
 DBUS_CATEGORIES_INTERFACE = 'org.projecthamster.HamsterDBus.CategoryManager1'
 DBUS_ACTIVITIES_INTERFACE = 'org.projecthamster.HamsterDBus.ActivityManager1'
@@ -368,4 +366,3 @@ class FactManager(dbus.service.Object):
         """
         facts = self.controller.store.facts.get_today()
         return [helpers.dbus_to_hamster_fact(fact) for fact in facts]
-

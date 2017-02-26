@@ -14,12 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with 'hamster-dbus'.  If not, see <http://www.gnu.org/licenses/>.
 
-from calendar import timegm
 import datetime
 from collections import namedtuple
 
 import hamster_lib
-
 
 DBusCategory = namedtuple('DBusCategory', ('pk', 'name'))
 # 'category' is supposed to store an ``DBushamster_lib.Category`` instance.
