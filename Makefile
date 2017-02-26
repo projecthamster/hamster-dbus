@@ -22,7 +22,6 @@ help:
 	@echo "   clean-pyc     to remove Python file artifacts"
 	@echo "   clean-docs"
 	@echo "   clean-test    to remove test and coverage artifacts"
-	@echo "   lint          to check style with flake8"
 	@echo "   test          to run tests quickly with the default Python"
 	@echo "   test-all      to run tests on every Python version with tox"
 	@echo "   coverage      to check code coverage quickly with the default Python"
@@ -61,9 +60,6 @@ develop:
 	pip install -U pip setuptools wheel
 	pip install -U -e .
 	pip install -U -r requirements/dev.pip
-
-lint:
-	flake8 hamster-bus tests
 
 test:
 	py.test $(TEST_ARGS) tests/
