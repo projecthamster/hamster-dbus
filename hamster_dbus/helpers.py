@@ -187,10 +187,10 @@ def hamster_to_dbus_fact(fact):
         pk=get_pk(fact),
         start=get_start(fact),
         end=get_end(fact),
+        description=get_description(fact),
         activity=get_activity(fact),
         # [FIXME]
         tags=get_tags(fact),
-        description=get_description(fact),
     )
 
 
@@ -222,14 +222,12 @@ def dbus_to_hamster_fact(fact_tuple):
     def get_description(fact_tuple):
         return fact_tuple.description
 
-    # Make sure we can deal with proper DBusFact instances as well as with
-    # 'unprepared' normal tuples.
     fact_tuple = DBusFact(*fact_tuple)
     return hamster_lib.Fact(
         pk=get_pk(fact_tuple),
         start=get_start(fact_tuple),
         end=get_end(fact_tuple),
+        description=get_description(fact_tuple),
         activity=get_activity(fact_tuple),
-        tags=get_tags(fact_tuple),
-        description=get_description(fact_tuple)
+        tags=get_tags(fact_tuple)
     )

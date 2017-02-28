@@ -141,3 +141,21 @@ class TestFactManager(object):
         stored_fact_batch_factory(5)
         result = fact_manager.GetAll('', '', '')
         assert len(result) == 5
+
+    def test_get_current_fact(self, fact_manager, current_fact):
+        result = fact_manager.GetCurrentFact()
+        assert helpers.dbus_to_hamster_fact(result) == current_fact
+
+    def test_cancel_current_fact(self, fact_manager, current_fact):
+        result = fact_manager.CancelCurrentFact()
+        assert result is None
+
+    def test_stop_current_fact(self, fact_manager, current_fact):
+        result = fact_manager.StopCurrentFact()
+        result = helpers.dbus_to_hamster_fact(result)
+        assert result.end
+
+    def test_foo(self, category_manager_object, current_fact):
+        result = category_manager_object.Get(1)
+        result = helpers.dbus_to_hamster_fact(result)
+        assert result.end

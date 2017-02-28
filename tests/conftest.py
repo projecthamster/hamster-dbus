@@ -31,9 +31,9 @@ def config(request, tmpdir):
         'store': 'sqlalchemy',
         'day_start': datetime.time(5, 30, 0),
         'fact_min_delta': 60,
-        'tmpfile_path': '/tmp/tmpfile.pickle',
+        'tmpfile_path': os.path.join(tmpdir.mkdir('hamster-dbus').strpath, 'tmpfile.pickle'),
         'db_engine': 'sqlite',
-        'db_path': os.path.join(tmpdir.mkdir('hamster-dbus').strpath, 'test.sqlite')
+        'db_path': ':memory:'
     }
 
 
@@ -270,3 +270,9 @@ def stored_fact_batch_factory(request, stored_fact_factory, faker):
             old_start = start
         return facts
     return factory
+
+@pytest.fixture
+def current_fact(request, store, fact):
+    """"Provide a 'current fact'."""
+    fact.end = None
+    return store.facts._start_tmp_fact(fact)

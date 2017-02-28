@@ -379,5 +379,22 @@ class FactManager(dbus.service.Object):
         Note:
             This only returns proper facts and will not include any ongoing fact!
         """
-        facts = self.controller.store.facts.get_today()
-        return [helpers.dbus_to_hamster_fact(fact) for fact in facts]
+        facts = self._controller.store.facts.get_today()
+        return [helpers.hamster_to_dbus_fact(fact) for fact in facts]
+
+    @dbus.service.method(DBUS_FACTS_INTERFACE, out_signature='(isss(is(is)b)a(is))')
+    def GetCurrentFact(self):  # NOQA
+        return helpers.hamster_to_dbus_fact(self._controller.store.facts.get_tmp_fact())
+
+    @dbus.service.method(DBUS_FACTS_INTERFACE)
+    def CancelCurrentFact(self):  # NOQA
+        return self._controller.store.facts.cancel_tmp_fact()
+
+
+    @dbus.service.method(DBUS_FACTS_INTERFACE, out_signature='(isss(is(is)b)a(is))')
+    def StopCurrentFact(self):  # NOQA
+        return helpers.hamster_to_dbus_fact(self._controller.store.facts.stop_tmp_fact())
+
+    @dbus.service.method(DBUS_FACTS_INTERFACE, out_signature='(isss(is(is)b)a(is))')
+    def StopCurrentFact(self):  # NOQA
+        return helpers.hamster_to_dbus_fact(self._controller.store.facts.stop_tmp_fact())
