@@ -26,9 +26,6 @@ please also refer to their documentation as we want to avoid duplication).
 Capitalization violates PEP8 due to dbus specifications on method names
 (https://dbus.freedesktop.org/doc/dbus-api-design.html).
 """
-# I still do not understand dbus objects completely so for now there is only the
-# main ``HamsterDBus`` object. Object specific managers are implemented as
-# separate interfaces to provide as least some degree of grouping/namespaceing.
 # Currently hamster-lib objects need to be converted into something that can be
 # passed over dbus. Future iteration should revisit this and see if we can
 # expose those objects as dbus objects and consequently just pass those.
