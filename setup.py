@@ -33,6 +33,7 @@ setup(
     ],
     package_dir={'hamster_dbus':
                  'hamster_dbus'},
+    package_data={'hamster-dbus': ['examples/*']},
     install_requires=requirements,
     license="GPL3",
     zip_safe=False,

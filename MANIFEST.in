@@ -8,6 +8,7 @@ include tox.ini
 include .editorconfig
 
 recursive-include tests *
+recursive-include examples *
 recursive-include requirements *.pip
 recursive-include docs *.rst conf.py Makefile make.bat
 recursive-exclude * __pycache__
