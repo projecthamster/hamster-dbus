@@ -5,8 +5,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime as dt
-import dbus
 
+import dbus
 import pytest
 from hamster_lib import Activity, Category, Fact, Tag
 

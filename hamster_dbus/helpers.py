@@ -36,18 +36,6 @@ DBusTag = namedtuple('DBusTag', ('pk', 'name'))
 DBusFact = namedtuple('DBusFact', ('pk', 'start', 'end', 'description', 'activity', 'tags'))
 
 
-def get_config():
-    """Get config to be passed to controller."""
-    return {
-        'store': 'sqlalchemy',
-        'day_start': datetime.time(5, 30, 0),
-        'fact_min_delta': 60,
-        'tmpfile_path': '/tmp/tmpfile.pickle',
-        'db_engine': 'sqlite',
-        'db_path': ':memory:',
-    }
-
-
 def _none_to_int(value):
     """
     Serialize ``None`` as an integer value.

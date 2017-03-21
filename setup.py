@@ -35,6 +35,9 @@ setup(
                  'hamster_dbus'},
     package_data={'hamster-dbus': ['examples/*']},
     install_requires=requirements,
+    entry_points={
+        'console_scripts': ['hamster-dbus-service = hamster_dbus.hamster_dbus_service:_main']
+    },
     license="GPL3",
     zip_safe=False,
     keywords='hamster-dbus',

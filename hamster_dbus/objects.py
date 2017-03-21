@@ -38,7 +38,7 @@ import dbus
 import dbus.service
 import hamster_lib
 
-from . import helpers
+from hamster_dbus import helpers
 
 DBUS_CATEGORIES_INTERFACE = 'org.projecthamster.HamsterDBus.CategoryManager1'
 DBUS_ACTIVITIES_INTERFACE = 'org.projecthamster.HamsterDBus.ActivityManager1'
