@@ -17,6 +17,16 @@ class CategoryFactory(factory.Factory):
         model = hamster_lib.Category
 
 
+class TagFactory(factory.Factory):
+    """Provide a factory for randomized ``hamster_lib.Tag`` instances."""
+
+    pk = None
+    name = fauxfactory.gen_utf8()
+
+    class Meta:
+        model = hamster_lib.Tag
+
+
 class ActivityFactory(factory.Factory):
     """Provide a factory for randomized ``hamster_lib.Activity`` instances."""
 
