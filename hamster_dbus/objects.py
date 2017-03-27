@@ -296,7 +296,7 @@ class FactManager(dbus.service.Object):
         return helpers.hamster_to_dbus_fact(result)
 
     @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='i')
-    def Remove(self, fact_pk):  # NOQA
+    def Remove(self, pk):  # NOQA
         """
         Remove fact from storage by it's PK.
 
@@ -306,9 +306,8 @@ class FactManager(dbus.service.Object):
         Returns:
             None: Nothing.
         """
-        fact = self._controller.store.facts.get(fact_pk)
+        fact = self._controller.store.facts.get(pk)
         self._controller.store.facts.remove(fact)
-        fact = self._controller.store.facts.get(fact_pk)
 
         # [FIXME]
         # if result:
