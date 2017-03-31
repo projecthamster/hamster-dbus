@@ -58,8 +58,6 @@ def _get_dbus_bus_name():
 class HamsterDBus(dbus.service.Object):
     """A dbus object providing access to general hamster-lib capabilities."""
 
-    # [FIXME]
-    # 'controller still needed?
     def __init__(self, loop):
         """Initialize main DBus object."""
         self._loop = loop
@@ -69,7 +67,7 @@ class HamsterDBus(dbus.service.Object):
             object_path='/org/projecthamster/HamsterDBus',
         )
 
-    @dbus.service.method('org.projecthamster.HamsterDBus')
+    @dbus.service.method('org.projecthamster.HamsterDBus1')
     def Quit(self):  # NOQA
         """Shutdown the service."""
         self._loop.quit()
