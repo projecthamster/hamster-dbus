@@ -84,6 +84,44 @@ class TestActivityManager(object):
 
 
 @pytest.mark.needs_dbus_service
+class TestTagManager(object):
+
+    def test_save_new(self, tag_manager, tag, tag_name_parametrized):
+        """Make sure an instance is created and returned."""
+
+        tag.name = tag_name_parametrized
+        dbus_tag = helpers.hamster_to_dbus_tag(tag)
+        result = tag_manager.Save(dbus_tag)
+        result = helpers.dbus_to_hamster_tag(result)
+        assert result.pk
+        assert tag.as_tuple(include_pk=False) == result.as_tuple(include_pk=False)
+
+    def test_remove(self, tag_manager, stored_tag):
+        """Make sure a tag is removed."""
+        result = tag_manager.Remove(stored_tag.pk)
+        assert result is None
+        # [FIXME]
+        # with pytest.raises(KeyError):
+        #    store.categories.get(stored_tag.pk)
+
+    def test_get_by_name(self, tag_manager, stored_tag):
+        """Make sure a matching tag is returned."""
+        result = tag_manager.GetByName(stored_tag.name)
+        result = helpers.dbus_to_hamster_tag(result)
+        assert result.pk == stored_tag.pk
+        assert result.name == stored_tag.name
+
+    def test_get_all(self, tag_manager, stored_tag_batch_factory):
+        """Make sure we get all stored categories."""
+        tags = stored_tag_batch_factory(5)
+        result = tag_manager.GetAll()
+        result = [helpers.dbus_to_hamster_tag(each) for each in result]
+        assert len(result) == 5
+        for tag in tags:
+            assert tag in result
+
+
+@pytest.mark.needs_dbus_service
 class TestFactManager(object):
 
     def test_save_new(self, fact_manager, fact):

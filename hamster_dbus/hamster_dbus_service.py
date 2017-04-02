@@ -55,6 +55,7 @@ def _main():
     objects.HamsterDBus(loop)
     objects.CategoryManager(controller)
     objects.ActivityManager(controller)
+    objects.TagManager(controller)
     objects.FactManager(controller)
     # Run needs to be called after we setup our service
     loop.run()

@@ -41,17 +41,20 @@ import hamster_lib
 from hamster_dbus import helpers
 
 DBUS_CATEGORIES_INTERFACE = 'org.projecthamster.HamsterDBus.CategoryManager1'
+DBUS_TAGS_INTERFACE = 'org.projecthamster.HamsterDBus.TagManager1'
 DBUS_ACTIVITIES_INTERFACE = 'org.projecthamster.HamsterDBus.ActivityManager1'
 DBUS_FACTS_INTERFACE = 'org.projecthamster.HamsterDBus.FactManager1'
 
 
-def _get_dbus_bus_name():
+def _get_dbus_bus_name(bus=None):
     """Return the bus name."""
     # We wrap this in a function instead of a constant to avoid instant
     # instantiation if we use this module as a library.
+    if not bus:
+        bus = dbus.SessionBus()
     return dbus.service.BusName(
         name='org.projecthamster.HamsterDBus',
-        bus=dbus.SessionBus()
+        bus=bus
     )
 
 
@@ -76,9 +79,10 @@ class HamsterDBus(dbus.service.Object):
 class CategoryManager(dbus.service.Object):
     """CategoryManager object to be exposed via DBus."""
 
-    def __init__(self, controller):
+    def __init__(self, controller, bus=None):
         """Initialize category manager object."""
         self._controller = controller
+        self._busname = _get_dbus_bus_name(bus)
 
         super(CategoryManager, self).__init__(
             bus_name=_get_dbus_bus_name(),
@@ -146,6 +150,79 @@ class CategoryManager(dbus.service.Object):
         """
         categories = self._controller.categories.get_all()
         return [helpers.hamster_to_dbus_category(category) for category in categories]
+
+
+class TagManager(dbus.service.Object):
+    """TagManager object to be exposed via DBus."""
+
+    def __init__(self, controller, bus=None):
+        """Initialize tag manager object."""
+        self._controller = controller
+        self._busname = _get_dbus_bus_name(bus)
+
+        super(TagManager, self).__init__(
+            bus_name=_get_dbus_bus_name(),
+            object_path='/org/projecthamster/HamsterDBus/TagManager',
+        )
+
+    @dbus.service.method(DBUS_TAGS_INTERFACE, in_signature='(is)', out_signature='(is)')
+    def Save(self, tag_tuple):  # NOQA
+        """
+        Save tag.
+
+        Args:
+            tag_tuple: hamster_lib.Tag tuple.
+
+        Returns:
+            helpers.DBusTag: For details please see ``helpers.haster_to_dbus_tag``.
+        """
+        tag = helpers.dbus_to_hamster_tag(tag_tuple)
+        tag = self._controller.store.tags.save(tag)
+        return helpers.hamster_to_dbus_tag(tag)
+
+    @dbus.service.method(DBUS_TAGS_INTERFACE, in_signature='i')
+    def Remove(self, pk):  # NOQA
+        """
+        Remove a tag.
+
+        Args:
+            pk (int): PK of the tag to be removed.
+
+        Returns:
+            None: Nothing.
+        """
+        # [TODO]
+        # Once LIB-239 has been solved, we should be able to skip extra tag
+        # retrieval.
+        tag = self._controller.store.tags.get(pk)
+        self._controller.store.tags.remove(tag)
+        return None
+
+    @dbus.service.method(DBUS_TAGS_INTERFACE, in_signature='s', out_signature='(is)')
+    def GetByName(self, name):  # NOQA
+        """
+        Look up a tag by its name and return its PK.
+
+        Args:
+            name (str): Name of the tag to we want the PK of.
+
+        Returns:
+            helpers.DBusTag: For details please see ``helpers.haster_to_dbus_tag``.
+        """
+        tag = self._controller.store.tags.get_by_name(name)
+        return helpers.hamster_to_dbus_tag(tag)
+
+    @dbus.service.method(DBUS_TAGS_INTERFACE, out_signature='a(is)')
+    def GetAll(self):  # NOQA
+        """
+        Get all tags.
+
+        Returns:
+            list: List of ``helpers.DBusTag``s. For details see
+                ``helpers.hamster_to_dbus_tag``.
+        """
+        tags = self._controller.store.tags.get_all()
+        return [helpers.hamster_to_dbus_tag(tag) for tag in tags]
 
 
 class ActivityManager(dbus.service.Object):

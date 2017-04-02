@@ -19,7 +19,14 @@ from .. import factories
 
 register(factories.CategoryFactory)
 register(factories.ActivityFactory)
+register(factories.TagFactory)
 register(factories.FactFactory)
+
+# [FIXME]
+# At several places we use ``faker.word`` instead of the original faked value.
+# If I remember correctly this is due to probems with ``dbusmock`` under python2
+# rather than our own code, but still this should at least be documented
+# somewhere.
 
 
 @pytest.fixture
@@ -115,6 +122,17 @@ def activity_manager(request, live_service):
 
 
 @pytest.fixture
+def tag_manager(request, live_service):
+    """Provide a convenient object hook to our hamster-dbus service."""
+    daemon, bus = live_service
+    object_ = bus.get_object('org.projecthamster.HamsterDBus',
+        '/org/projecthamster/HamsterDBus/TagManager')
+    interface = dbus.Interface(object_,
+        dbus_interface='org.projecthamster.HamsterDBus.TagManager1')
+    return interface
+
+
+@pytest.fixture
 def fact_manager(request, live_service):
     """Provide a convenient object hook to our hamster-dbus service."""
     daemon, bus = live_service
@@ -145,6 +163,17 @@ def category_name_parametrized(request):
 ])
 def activity_name_parametrized(request):
     """Provide a huge variety of possible ``Activity.name`` strings."""
+    return request.param
+
+
+@pytest.fixture(params=[
+    fauxfactory.gen_alpha(),
+    fauxfactory.gen_utf8(),
+    fauxfactory.gen_latin1(),
+    fauxfactory.gen_cjk(),
+])
+def tag_name_parametrized(request):
+    """Provide a huge variety of possible ``Tag.name`` strings."""
     return request.param
 
 
@@ -210,6 +239,38 @@ def stored_activity_batch_factory(request, stored_activity_factory, faker):
         for i in range(amount):
             activities.append(stored_activity_factory(name=faker.word()))
         return activities
+    return factory
+
+
+@pytest.fixture
+def stored_tag_factory(request, tag_manager, tag_factory, faker):
+    """
+    A factory for tag instances that are present in our persistent store.
+
+    Because we do not have access to the actual store we need to assume that
+    the ``Save`` method works as expected.
+    """
+    def factory(**kwargs):
+        tag = tag_factory.build(**kwargs)
+        result = tag_manager.Save(helpers.hamster_to_dbus_tag(tag))
+        return helpers.dbus_to_hamster_tag(result)
+    return factory
+
+
+@pytest.fixture
+def stored_tag(request, stored_tag_factory):
+    """A singe persistent tag instances."""
+    return stored_tag_factory()
+
+
+@pytest.fixture
+def stored_tag_batch_factory(request, stored_tag_factory, faker):
+    """A factory for tag instances that are present in our persistent store."""
+    def factory(amount):
+        tags = []
+        for i in range(amount):
+            tags.append(stored_tag_factory(name=faker.word()))
+        return tags
     return factory
 
 
