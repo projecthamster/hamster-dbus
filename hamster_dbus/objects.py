@@ -99,9 +99,18 @@ class HamsterDBus(dbus.service.Object):
 class CategoryManager(dbus.service.Object):
     """CategoryManager object to be exposed via DBus."""
 
-    def __init__(self, controller, bus=None):
-        """Initialize category manager object."""
+    def __init__(self, controller, main_object, bus=None):
+        """
+        Initialize category manager object.
+
+        Args:
+            controller: FIXME
+            main_object: ``HamsterDBus`` object. This is needed in order to
+                emmit signals.
+            bus (optional): FIXME
+        """
         self._controller = controller
+        self._main_object = main_object
         self._busname = _get_dbus_bus_name(bus)
 
         super(CategoryManager, self).__init__(
@@ -171,9 +180,18 @@ class CategoryManager(dbus.service.Object):
 class TagManager(dbus.service.Object):
     """TagManager object to be exposed via DBus."""
 
-    def __init__(self, controller, bus=None):
-        """Initialize tag manager object."""
+    def __init__(self, controller, main_object, bus=None):
+        """
+        Initialize tag manager object.
+
+        Args:
+            controler: FIXME
+            main_object: ``HamsterDBus`` object. This is needed in order to
+                emmit signals.
+            bus (optional): FIXME
+        """
         self._controller = controller
+        self._main_object = main_object
         self._busname = _get_dbus_bus_name(bus)
 
         super(TagManager, self).__init__(
@@ -244,9 +262,20 @@ class TagManager(dbus.service.Object):
 class ActivityManager(dbus.service.Object):
     """ActivityManager object to be exposed via DBus."""
 
-    def __init__(self, controller):
-        """Initialize activity manager object."""
+    def __init__(self, controller, main_object):
+        """
+        Initialize activity manager object.
+
+        Args:
+            controler: FIXME
+            main_object: ``HamsterDBus`` object. This is needed in order to
+                emmit signals.
+        """
+        # [FIXME]
+        # Unlike with ``CategoryManager`` and ``TagManager`` we do not allow for
+        # a custom bus.
         self._controller = controller
+        self._main_object = main_object
 
         super(ActivityManager, self).__init__(
             bus_name=_get_dbus_bus_name(),
@@ -332,9 +361,20 @@ class ActivityManager(dbus.service.Object):
 class FactManager(dbus.service.Object):
     """FactManager object to be exposed via DBus."""
 
-    def __init__(self, controller):
-        """Initialize fact manager object."""
+    def __init__(self, controller, main_object):
+        """
+        Initialize fact manager object.
+
+        Args:
+            controler: FIXME
+            main_object: ``HamsterDBus`` object. This is needed in order to
+                emmit signals.
+        """
+        # [FIXME]
+        # Unlike with ``CategoryManager`` and ``TagManager`` we do not allow for
+        # a custom bus.
         self._controller = controller
+        self._main_object = main_object
 
         super(FactManager, self).__init__(
             bus_name=_get_dbus_bus_name(),

@@ -52,11 +52,11 @@ def _main():
     controller = hamster_lib.HamsterControl(_get_config())
     DBusGMainLoop(set_as_default=True)
     loop = GLib.MainLoop()
-    objects.HamsterDBus(loop)
-    objects.CategoryManager(controller)
-    objects.ActivityManager(controller)
-    objects.TagManager(controller)
-    objects.FactManager(controller)
+    main_object = objects.HamsterDBus(loop)
+    objects.CategoryManager(controller, main_object)
+    objects.ActivityManager(controller, main_object)
+    objects.TagManager(controller, main_object)
+    objects.FactManager(controller, main_object)
     # Run needs to be called after we setup our service
     loop.run()
 
