@@ -114,7 +114,7 @@ class CategoryManager(dbus.service.Object):
         self._busname = _get_dbus_bus_name(bus)
 
         super(CategoryManager, self).__init__(
-            bus_name=_get_dbus_bus_name(),
+            bus_name=self._busname,
             object_path='/org/projecthamster/HamsterDBus/CategoryManager',
         )
 
