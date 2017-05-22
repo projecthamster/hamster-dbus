@@ -131,6 +131,8 @@ class CategoryManager(dbus.service.Object):
         """
         category = helpers.dbus_to_hamster_category(category_tuple)
         category = self._controller.store.categories.save(category)
+
+        self._main_object.CategoryChanged()
         return helpers.hamster_to_dbus_category(category)
 
     @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='i')
@@ -149,6 +151,8 @@ class CategoryManager(dbus.service.Object):
         # retrieval.
         category = self._controller.store.categories.get(pk)
         self._controller.store.categories.remove(category)
+
+        self._main_object.CategoryChanged()
         return None
 
     @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='s', out_signature='(is)')
@@ -212,6 +216,8 @@ class TagManager(dbus.service.Object):
         """
         tag = helpers.dbus_to_hamster_tag(tag_tuple)
         tag = self._controller.store.tags.save(tag)
+
+        self._main_object.TagChanged()
         return helpers.hamster_to_dbus_tag(tag)
 
     @dbus.service.method(DBUS_TAGS_INTERFACE, in_signature='i')
@@ -230,6 +236,8 @@ class TagManager(dbus.service.Object):
         # retrieval.
         tag = self._controller.store.tags.get(pk)
         self._controller.store.tags.remove(tag)
+
+        self._main_object.TagChanged()
         return None
 
     @dbus.service.method(DBUS_TAGS_INTERFACE, in_signature='s', out_signature='(is)')
@@ -297,8 +305,10 @@ class ActivityManager(dbus.service.Object):
         activity = helpers.dbus_to_hamster_activity(activity_tuple)
         result = self._controller.activities.save(activity)
 
-        # [FIXME]
-        # self.activities_changed()
+        self._main_object.ActivityChanged()
+        self._main_object.CategoryChanged()
+        # This is because during activity creation/updating a new category may
+        # be created as well.
         return helpers.hamster_to_dbus_activity(result)
 
     @dbus.service.method(DBUS_ACTIVITIES_INTERFACE, in_signature='i')
@@ -314,8 +324,7 @@ class ActivityManager(dbus.service.Object):
         activity = self._controller.activities.get(pk)
         self._controller.activities.remove(activity)
 
-        # [FIXME]
-        # self.activities_changed()
+        self._main_object.ActivityChanged()
         return None
 
     @dbus.service.method(DBUS_ACTIVITIES_INTERFACE, in_signature='i', out_signature='(is(is)b)')
@@ -400,8 +409,12 @@ class FactManager(dbus.service.Object):
         fact = hamster_lib.Fact.create_from_raw_fact(raw_fact)
         result = self._controller.store.facts.save(fact)
 
-        # [FIXME]
-        # self.facts_changed()
+        self._main_object.FactChanged()
+        self._main_object.CategoryChanged()
+        self._main_object.TagChanged()
+        self._main_object.ActivityChanged()
+        # This is because during creation/updating a new related instances
+        # may be created as well.
 
         return helpers.hamster_to_dbus_fact(result)
 
@@ -421,8 +434,12 @@ class FactManager(dbus.service.Object):
         fact = helpers.dbus_to_hamster_fact(fact_tuple)
         result = self._controller.store.facts.save(fact)
 
-        # [FIXME]
-        # self.facts_changed()
+        self._main_object.FactChanged()
+        self._main_object.CategoryChanged()
+        self._main_object.TagChanged()
+        self._main_object.ActivityChanged()
+        # This is because during creation/updating a new related instances
+        # may be created as well.
 
         return helpers.hamster_to_dbus_fact(result)
 
@@ -440,9 +457,7 @@ class FactManager(dbus.service.Object):
         fact = self._controller.store.facts.get(pk)
         self._controller.store.facts.remove(fact)
 
-        # [FIXME]
-        # if result:
-        #    self.facts_changed()
+        self._main_object.FactChanged()
         return None
 
     @dbus.service.method(DBUS_FACTS_INTERFACE, in_signature='i',
