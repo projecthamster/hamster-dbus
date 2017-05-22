@@ -70,6 +70,26 @@ class HamsterDBus(dbus.service.Object):
             object_path='/org/projecthamster/HamsterDBus',
         )
 
+    @dbus.service.signal('org.projecthamster.HamsterDBus1')
+    def CategoryChanged(self):  # NOQA
+        """Signal indicating that at least one category may have been modified."""
+        pass
+
+    @dbus.service.signal('org.projecthamster.HamsterDBus1')
+    def ActivityChanged(self):  # NOQA
+        """Signal indicating that at least one activity may have been modified."""
+        pass
+
+    @dbus.service.signal('org.projecthamster.HamsterDBus1')
+    def TagChanged(self):  # NOQA
+        """Signal indicating that at least one tag may have been modified."""
+        pass
+
+    @dbus.service.signal('org.projecthamster.HamsterDBus1')
+    def FactChanged(self):  # NOQA
+        """Signal indicating that at least one fact may have been modified."""
+        pass
+
     @dbus.service.method('org.projecthamster.HamsterDBus1')
     def Quit(self):  # NOQA
         """Shutdown the service."""
