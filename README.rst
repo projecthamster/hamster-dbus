@@ -48,6 +48,14 @@ virtualenv (after ``make develop``)::
 
     make test
 
+Sidenote About Testing Signals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+So far we have not managed to establish a proper way of testing signals.
+In order to manually check if they are emitted as expected you may use the
+following (``dbus-monitor`` needs to be installed)::
+
+    dbus-monitor "type='signal',sender='org.projecthamster.HamsterDBus',interface='org.projecthamster.HamsterDBus1'
+
 
 Credits
 ---------
