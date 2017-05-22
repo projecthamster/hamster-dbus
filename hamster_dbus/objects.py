@@ -109,10 +109,6 @@ class CategoryManager(dbus.service.Object):
             object_path='/org/projecthamster/HamsterDBus/CategoryManager',
         )
 
-    # [FIXME]
-    # Missing ``hamster_lib.CategoryManager`` methods that still need to be implemented:
-    # ``get_or_create``.
-
     @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='(is)', out_signature='(is)')
     def Save(self, category_tuple):  # NOQA
         """
