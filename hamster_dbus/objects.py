@@ -155,6 +155,23 @@ class CategoryManager(dbus.service.Object):
         self._main_object.CategoryChanged()
         return None
 
+    @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='i', out_signature='(is)')
+    def Get(self, pk):  # NOQA
+        """
+        Return a category based on their pk.
+
+        Args:
+            pk (int): PK of the category to be retrieved.
+
+        Returns:
+            tuple: helpers.DBusCategory tuple.
+
+        Raises:
+            KeyError: If no such PK was found.
+        """
+        category = self._controller.categories.get(pk)
+        return helpers.hamster_to_dbus_category(category)
+
     @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='s', out_signature='(is)')
     def GetByName(self, name):  # NOQA
         """
