@@ -135,6 +135,25 @@ class CategoryManager(dbus.service.Object):
         self._main_object.CategoryChanged()
         return helpers.hamster_to_dbus_category(category)
 
+    @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='(is)', out_signature='(is)')
+    def GetOrCreate(self, category_tuple):  # NOQA
+        """
+        For details please refer to ``hamster_lib.storage``.
+
+        Args:
+            category (helpers.DBusCategory or None): The category 'dbus encoded'.
+
+        Returns:
+            helpers.DBusCategory or None: The retrieved or created category.
+                Either way, the returned Category will contain all data from
+                the backend, including its primary key.
+        """
+        category = helpers.dbus_to_hamster_category(category_tuple)
+        category = self._controller.store.categories.get_or_create(category)
+
+        self._main_object.CategoryChanged()
+        return helpers.hamster_to_dbus_category(category)
+
     @dbus.service.method(DBUS_CATEGORIES_INTERFACE, in_signature='i')
     def Remove(self, pk):  # NOQA
         """

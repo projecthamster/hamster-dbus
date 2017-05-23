@@ -20,6 +20,24 @@ class TestCategoryManager(object):
         assert result.pk
         assert category.as_tuple(include_pk=False) == result.as_tuple(include_pk=False)
 
+    def test_get_or_create_created(self, category_manager, category):
+        """Make sure an instance is created and returned."""
+        assert not category_manager.GetAll()
+        dbus_category = helpers.hamster_to_dbus_category(category)
+        result = category_manager.GetOrCreate(dbus_category)
+        result = helpers.dbus_to_hamster_category(result)
+        assert result.pk
+        assert category.as_tuple(include_pk=False) == result.as_tuple(include_pk=False)
+
+    def test_get_or_create_get(self, category_manager, stored_category):
+        """If name exists make sure it is fetched and no new one created."""
+        assert len(category_manager.GetAll()) == 1
+        dbus_category = helpers.hamster_to_dbus_category(stored_category)
+        result = category_manager.GetOrCreate(dbus_category)
+        result = helpers.dbus_to_hamster_category(result)
+        assert len(category_manager.GetAll()) == 1
+        assert stored_category.as_tuple(include_pk=False) == result.as_tuple(include_pk=False)
+
     def test_remove(self, category_manager, stored_category):
         """Make sure a category is removed."""
         result = category_manager.Remove(stored_category.pk)
