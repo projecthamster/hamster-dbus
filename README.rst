@@ -8,6 +8,29 @@ A dbus interface to ``hamster-lib``.
 * Documentation: https://hamster-dbus.readthedocs.org.
 
 
+How to use
+-----------
+
+``hamster-dbus`` provides two very different but related functionalities.
+
+1. ``hamster_dbus.objects`` provides several dbus object subclasses that can
+   be used to export services over dbus that in effect expose ``hamster-lib``
+   to over dbus.
+
+2. ``hamster_dbus.storage`` contains ``DBusStore`` which can be used as a valid
+   backend for ``hamster-lib`` that can communicate with the objects defined in
+   ``hamster_dbus.objects``. This means any client that supports
+   ``hamster-lib`` can use this backend (instead of the default SQLAlchemy one
+   for example) to easily make their clients use an available dbus service
+   instead of handling the backend functionality itself via SQLAlchemy.
+
+These two aspects are independent of each other but are two opposing sides
+(server and client of sorts) of the same medal.
+
+On top of this, a primitive example dbus-service executeable
+(``hamster_dbus_service.py``) has been included that can be used to get a
+minimal hamster-dbus service running in no time.
+
 Testing & Coverage
 -------------------
 
