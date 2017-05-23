@@ -46,6 +46,13 @@ class TestCategoryManager(object):
         # with pytest.raises(KeyError):
         #    store.categories.get(stored_category.pk)
 
+    def test_get(self, category_manager, stored_category):
+        """Make sure a matching category is returned."""
+        result = category_manager.Get(stored_category.pk)
+        result = helpers.dbus_to_hamster_category(result)
+        assert result.pk == stored_category.pk
+        assert result.name == stored_category.name
+
     def test_get_by_name(self, category_manager, stored_category):
         """Make sure a matching category is returned."""
         result = category_manager.GetByName(stored_category.name)
