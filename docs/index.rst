@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to hamster-dbus's documentation!
-======================================
+==========================================
 
 Contents:
 
@@ -16,7 +16,9 @@ Contents:
    usage
    contributing
    authors
+   packaging
    history
+   modules
 
 Indices and tables
 ==================

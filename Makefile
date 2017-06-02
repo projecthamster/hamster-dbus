@@ -22,7 +22,6 @@ help:
 	@echo "   clean-pyc     to remove Python file artifacts"
 	@echo "   clean-docs"
 	@echo "   clean-test    to remove test and coverage artifacts"
-	@echo "   lint          to check style with flake8"
 	@echo "   test          to run tests quickly with the default Python"
 	@echo "   test-all      to run tests on every Python version with tox"
 	@echo "   coverage      to check code coverage quickly with the default Python"
@@ -62,9 +61,6 @@ develop:
 	pip install -U -e .
 	pip install -U -r requirements/dev.pip
 
-lint:
-	flake8 hamster-bus tests
-
 test:
 	py.test $(TEST_ARGS) tests/
 
@@ -80,15 +76,15 @@ coverage-html: coverage
 	$(BROWSER) htmlcov/index.html
 
 docs:
-	rm -f docs/hamster-bus.rst
+	rm -f docs/hamster_dbus.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ hamster-bus
+	sphinx-apidoc -o docs/ hamster_dbus
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
 
 isort:
-	isort --recursive setup.py hamster-bus/ tests/
+	isort --recursive setup.py hamster_dbus/ tests/
 
 
 servedocs: docs

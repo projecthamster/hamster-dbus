@@ -17,22 +17,27 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'future',
+    'hamster_lib',
 ]
 
 setup(
     name='hamster-dbus',
     version='0.10.0',
-    description="A dbus interface to hamsterlib.",
+    description="A dbus interface to hamster-lib.",
     long_description=readme + '\n\n' + history,
     author="Eric Goller",
-    author_email='Elbenfreund@DenkenInEchtzeit.net',
+    author_email='eric.goller@ninjaduck.solutions',
     url='https://github.com/elbenfreund/hamster-dbus',
     packages=[
         'hamster_dbus',
     ],
     package_dir={'hamster_dbus':
                  'hamster_dbus'},
+    package_data={'hamster-dbus': ['examples/*']},
     install_requires=requirements,
+    entry_points={
+        'console_scripts': ['hamster-dbus-service = hamster_dbus.hamster_dbus_service:_main']
+    },
     license="GPL3",
     zip_safe=False,
     keywords='hamster-dbus',
